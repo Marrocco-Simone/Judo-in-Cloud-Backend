@@ -5,6 +5,6 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "skipLibCheck": true,
-        "outDir": "../dist"
+        "outDir": "dist"
     }
 }
