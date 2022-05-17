@@ -1,14 +1,12 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 interface CategoryInterface {
-  _id: String,
-  age_class_id: String,
-  max_weight: String,
-  gender: 'M'|'F',
+  age_class_id: string;
+  max_weight: string;
+  gender: 'M'|'F';
 }
 
 const category_schema = new Schema<CategoryInterface>({
-  _id: SchemaTypes.ObjectId,
   age_class_id: {
     type: SchemaTypes.ObjectId,
     ref: 'AgeClass',
@@ -17,4 +15,5 @@ const category_schema = new Schema<CategoryInterface>({
   gender: String,
 });
 
-export const category = model('Category', category_schema);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Category = model('Category', category_schema);
