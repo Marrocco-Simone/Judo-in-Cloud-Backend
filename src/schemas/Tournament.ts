@@ -1,19 +1,17 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 interface TournamentInterface {
-  _id: String,
-  competition_id: String,
-  category_id: String,
-  tatami_number: Number,
-  finished: Boolean,
-  athletes: string[],
-  winners_bracket: string[],
-  recovered_bracket_1: string[],
-  recovered_bracket_2: string[],
+  competition_id: string;
+  category_id: string;
+  tatami_number: number;
+  finished: boolean;
+  athletes: string[];
+  winners_bracket: string[];
+  recovered_bracket_1: string[];
+  recovered_bracket_2: string[];
 }
 
 const tournament_schema = new Schema<TournamentInterface>({
-  _id: SchemaTypes.ObjectId,
   competition_id: String,
   category_id: String,
   tatami_number: Number,
@@ -36,4 +34,5 @@ const tournament_schema = new Schema<TournamentInterface>({
   }],
 });
 
-export const tournament = model('Tournament', tournament_schema);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Tournament = model('Tournament', tournament_schema);
