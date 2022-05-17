@@ -3,23 +3,36 @@ import { athlete_router } from './routers/athlete_router';
 import { ageclass_router } from './routers/ageclass_router';
 import { tournament_router } from './routers/tournament_router';
 import { match_router } from './routers/match_router';
+import { auth_router } from './routers/auth_router';
+import jwt = require('jsonwebtoken');
 
 import express = require('express');
 import cors = require('cors');
 import 'dotenv/config';
 import mongoose from 'mongoose';
+import { unauthorized } from './controllers/base_controller';
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
 const server_url = process.env.SERVER_URL;
 const mongo_url = process.env.MONGO_URL;
+const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
 
-if ([server_port, server_url, mongo_url].includes(undefined)) {
+if ([server_port, server_url, mongo_url, access_token_secret].includes(undefined)) {
   throw new Error('Application not correctly configured, please copy .env.example to .env ' +
     'and update it with your configuration, then restart.');
 }
 
 mongoose.connect(process.env.MONGO_URL);
+
+// handle type from middlewares
+declare global {
+  namespace Express {
+    interface Request {
+      user: jwt.JwtPayload | string;
+    }
+  }
+}
 
 // for cors policy
 app.use(cors({ origin: '*' }));
@@ -33,10 +46,28 @@ app.use((req, res, next) => {
 // It parses incoming JSON requests and puts the parsed data in req.body
 app.use(express.json());
 
-app.use('/api/v1/athletes', athlete_router);
-app.use('/api/v1/age_classes', ageclass_router);
-app.use('/api/v1/tournaments', tournament_router);
-app.use('/api/v1/matches', match_router);
+// jwt authentication
+const authenticate_token: express.RequestHandler = (req, res, next) => {
+  const auth_header = req.headers.authorization;
+  if (!auth_header) {
+    return unauthorized(res);
+  }
+  const token = auth_header.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return unauthorized(res);
+    }
+    // here the user can be loaded from the db to make it available in every controller
+    req.user = user;
+    next();
+  });
+};
+
+app.use('/api/v1/athletes', [authenticate_token, athlete_router]);
+app.use('/api/v1/age_classes', [authenticate_token, ageclass_router]);
+app.use('/api/v1/tournaments', [authenticate_token, tournament_router]);
+app.use('/api/v1/matches', [authenticate_token, match_router]);
+app.use('/api/v1/auth', auth_router);
 
 // not found page
 app.get('*', async (req, res) => {
