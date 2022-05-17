@@ -10,7 +10,7 @@ import express = require('express');
 import cors = require('cors');
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { unauthorized } from './controllers/base_controller';
+import { authenticate_token } from './middlewares/AuthenticateMiddleware';
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
@@ -45,23 +45,6 @@ app.use((req, res, next) => {
 
 // It parses incoming JSON requests and puts the parsed data in req.body
 app.use(express.json());
-
-// jwt authentication
-const authenticate_token: express.RequestHandler = (req, res, next) => {
-  const auth_header = req.headers.authorization;
-  if (!auth_header) {
-    return unauthorized(res);
-  }
-  const token = auth_header.split(' ')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) {
-      return unauthorized(res);
-    }
-    // here the user can be loaded from the db to make it available in every controller
-    req.user = user;
-    next();
-  });
-};
 
 app.use('/api/v1/athletes', [authenticate_token, athlete_router]);
 app.use('/api/v1/age_classes', [authenticate_token, ageclass_router]);
