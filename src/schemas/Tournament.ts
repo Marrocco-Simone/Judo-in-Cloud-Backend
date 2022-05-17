@@ -35,3 +35,5 @@ const TournamentSchema = new Schema<TournamentInterface>({
         ref: "Match"
     }],
 })
+
+export const Tournament = model("Tournament", TournamentSchema);
