@@ -2,8 +2,8 @@ import { model, Schema, SchemaTypes } from "mongoose";
 
 interface TournamentInterface  {
     _id: String,
-    competition_id?: String,
-    category_id?: String,
+    competition_id: String,
+    category_id: String,
     tatami_number: Number,
     finished: Boolean,
     athletes: string[],

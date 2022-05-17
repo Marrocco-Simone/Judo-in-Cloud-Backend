@@ -21,9 +21,9 @@ const AgeClassParamsSchema = new Schema<AgeClassParamsInterface>({
 interface AgeClassInterface  {
     _id: String,
     max_age: Number,
-    competition_id?: String,
+    competition_id: String,
     name: String,
-    closed: boolean,
+    closed: Boolean,
     params: AgeClassParamsInterface,
 }
 

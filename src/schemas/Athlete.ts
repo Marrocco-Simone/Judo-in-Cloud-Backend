@@ -4,12 +4,12 @@ interface AthleteInterface  {
     _id: String,
     name: String,
     surname: String,
-    competition_id?: String,
+    competition_id: String,
     club: String,
     gender: "M"|"F",
     weight: Number,
     birth_year: Number,
-    category_id?: String,
+    category_id: String,
 }
 
 const AthleteSchema = new Schema<AthleteInterface>({

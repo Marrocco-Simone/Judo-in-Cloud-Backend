@@ -2,7 +2,7 @@ import { model, Schema, SchemaTypes } from "mongoose";
 
 interface CategoryInterface  {
     _id: String,
-    age_class_id?: String,
+    age_class_id: String,
     max_weight: String,
     gender: "M"|"F",
 }

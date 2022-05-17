@@ -24,12 +24,12 @@ type MatchTypeInterface = 'principale'|'recupero'|'finale 3-5'|'finale 1-2'|'qua
 
 interface MatchInterface  {
     _id: String,
-    white_athlete_id?: String,
-    red_athlete_id?: String,
-    winner_athlete_id?: String,
-    tournament_id?: String,
-    is_started: boolean,
-    is_over: boolean,
+    white_athlete_id: String,
+    red_athlete_id: String,
+    winner_athlete_id: String,
+    tournament_id: String,
+    is_started: Boolean,
+    is_over: Boolean,
     match_type: MatchTypeInterface,
     match_scores: MatchScoresInterface
 }
