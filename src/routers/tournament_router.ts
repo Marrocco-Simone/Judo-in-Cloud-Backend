@@ -1,7 +1,15 @@
-import express = require('express');
-/** api for tournaments */
-export const tournament_router = express.Router();
+const express = require('express');
+const tournaments_router = express.Router();
+const Tournaments = require('../schemas/Tournaments')
 
-tournament_router.get('/test', async (req, res) => {
-  res.json({ success: 1 });
-});
+// Getting all
+tournaments_router.get('/', async (req, res) => {
+    try{
+        const tournaments = await Tournaments.find();
+        res.json(tournaments);
+    }catch (err){
+        res.status(500).json({ message: err.message })
+    }
+})
+
+module.exports = tournaments_router;
