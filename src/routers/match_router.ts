@@ -43,25 +43,25 @@ export const match_router = express.Router();
   }
 });
 
-match_router.get('/:matchid', async (req, res) => {
+match_router.get('/:match_id', async (req, res) => {
   try {
-    const match_id = req.params.matchid;
+    const match_id = req.params.match_id;
     const match = await Match.findById(match_id)
       .populate('white_athlete')
       .populate('red_athlete')
       .populate('winner_athlete');
-    if (match == null) return fail(res, 'Match not found', 404);
+    if (!match) return fail(res, 'Match not found', 404);
     success(res, match);
   } catch (e) {
     error(res, e.message);
   }
 });
 
-match_router.post('/:matchid', async (req, res) => {
+match_router.post('/:match_id', async (req, res) => {
   try {
-    const match_id = req.params.matchid;
+    const match_id = req.params.match_id;
     const match = await Match.findById(match_id);
-    if (match == null) return fail(res, 'Match not found', 404);
+    if (!match) return fail(res, 'Match not found', 404);
     const body: {
       winner_athlete: string,
       is_started: boolean;
