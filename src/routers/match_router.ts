@@ -42,3 +42,17 @@ export const match_router = express.Router();
     error(res, e.message);
   }
 });
+
+match_router.get('/:matchid', async (req, res) => {
+  try {
+    const match_id = req.params.matchid;
+    const match = await Match.findById(match_id)
+      .populate('white_athlete')
+      .populate('red_athlete')
+      .populate('winner_athlete');
+    if (match == null) return fail(res, 'Match not found', 404);
+    success(res, match);
+  } catch (e) {
+    error(res, e.message);
+  }
+});
