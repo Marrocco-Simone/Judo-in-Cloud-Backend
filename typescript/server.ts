@@ -28,7 +28,14 @@ app.use('/api/v1/ageclass', ageclass_router);
 app.use('/api/v1/tournament', tournament_router);
 app.use('/api/v1/match', match_router);
 
-//not found page
+// at the basic endpoint we give a message from which one can tell if the server is up or not
+app.get('/', async (req, res) => {
+    res.status(200).send({
+      status: 'OK'
+    })
+  })
+
+// not found page
 app.get('*', async (req, res) => {
     res.status(404).send({
         success: 0,
@@ -36,5 +43,5 @@ app.get('*', async (req, res) => {
     })
 })
 
-//start server
+// start server
 app.listen(server_port, () => console.log(`Listening on ${server_url}:${server_port}`));
