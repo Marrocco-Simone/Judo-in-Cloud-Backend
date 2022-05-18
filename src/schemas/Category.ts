@@ -1,13 +1,13 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 interface CategoryInterface {
-  age_class_id: string;
+  age_class: string;
   max_weight: string;
   gender: 'M'|'F';
 }
 
 const category_schema = new Schema<CategoryInterface>({
-  age_class_id: {
+  age_class: {
     type: SchemaTypes.ObjectId,
     ref: 'AgeClass',
   },
