@@ -1,6 +1,8 @@
-const express = require('express');
-const ageclass_router = express.Router();
-import {Age_class} from '../schemas/AgeClass';
+import express = require('express');
+import { Age_class } from '../schemas/AgeClass';
+/** api for tournaments */
+export const ageclass_router = express.Router();
+
 
 // Getting all
 ageclass_router.get('/params', async (req, res) => {
@@ -45,7 +47,3 @@ ageclass_router.post('/params', async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 })
-
-
-
-module.exports = ageclass_router;
