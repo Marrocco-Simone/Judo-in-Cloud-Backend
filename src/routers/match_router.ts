@@ -86,3 +86,13 @@ match_router.post('/:matchid', async (req, res) => {
     error(res, e.message);
   }
 });
+
+// Getting all
+match_router.get('/:matchid', async (req, res) => {
+    try{
+        const match = await Match.find();
+        res.json(match);
+    }catch (err){
+        res.status(500).json({ message: err.message })
+    }
+})
