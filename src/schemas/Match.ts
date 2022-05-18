@@ -23,10 +23,10 @@ const match_score_schema = new Schema<MatchScoresInterface>({
 type MatchTypeInterface = 'principale'|'recupero'|'finale 3-5'|'finale 1-2'|'quarto di finale'|'semifinale'
 
 interface MatchInterface {
-  white_athlete_id: string;
-  red_athlete_id: string;
-  winner_athlete_id: string;
-  tournament_id: string;
+  white_athlete: string;
+  red_athlete: string;
+  winner_athlete: string;
+  tournament: string;
   is_started: boolean;
   is_over: boolean;
   match_type: MatchTypeInterface;
@@ -34,19 +34,19 @@ interface MatchInterface {
 }
 
 const match_schema = new Schema<MatchInterface>({
-  white_athlete_id: {
+  white_athlete: {
     type: SchemaTypes.ObjectId,
     ref: 'Athlete',
   },
-  red_athlete_id: {
+  red_athlete: {
     type: SchemaTypes.ObjectId,
     ref: 'Athlete',
   },
-  winner_athlete_id: {
+  winner_athlete: {
     type: SchemaTypes.ObjectId,
     ref: 'Athlete',
   },
-  tournament_id: {
+  tournament: {
     type: SchemaTypes.ObjectId,
     ref: 'Tournament',
   },
