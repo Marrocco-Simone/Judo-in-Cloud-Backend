@@ -20,7 +20,7 @@ const age_class_params_schema = new Schema<AgeClassParamsInterface>({
 
 interface AgeClassInterface {
   max_age: number;
-  competition_id: string;
+  competition: string;
   name: string;
   closed: boolean;
   params: AgeClassParamsInterface;
@@ -28,7 +28,7 @@ interface AgeClassInterface {
 
 const age_class_schema = new Schema<AgeClassInterface>({
   max_age: Number,
-  competition_id: {
+  competition: {
     type: SchemaTypes.ObjectId,
     ref: 'Competition'
   },

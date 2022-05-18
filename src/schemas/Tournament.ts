@@ -1,8 +1,8 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 interface TournamentInterface {
-  competition_id: string;
-  category_id: string;
+  competition: string;
+  category: string;
   tatami_number: number;
   finished: boolean;
   athletes: string[];
@@ -12,8 +12,8 @@ interface TournamentInterface {
 }
 
 const tournament_schema = new Schema<TournamentInterface>({
-  competition_id: String,
-  category_id: String,
+  competition: String,
+  category: String,
   tatami_number: Number,
   finished: Boolean,
   athletes: [{
