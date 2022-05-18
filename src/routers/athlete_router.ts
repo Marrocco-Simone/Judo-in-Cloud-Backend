@@ -8,7 +8,7 @@ const express = require('express');
 // });
 
 const athlete_router = express.Router();
-const Athlets = require('/models/ath')
+import {Athelts} from '../schemas/Athlete';
 
 // Getting all
 athlete_router.get('/', async (req, res) => {
@@ -40,45 +40,21 @@ athlete_router.post('/', async (req, res) => {
 })
 
 // Creating Many
-athlete_router.post('/', async (req, res) => {
-    // User model
-    const Athlete = mongoose.model('Athlete', {
-        id: { type: SchemaTypes.ObjectId },
-        name: { type: String },
-        surname: { type: String },
-        club: { type: String },
-        gender: { type: String },
-        weight: { type: Number },
-        birth_year: { type: Number },
-    });
-
-    const idArray = (urlParams.getAll('id'));
-    const nameArray = (urlParams.getAll('name'));
-    const surnameArray = (urlParams.getAll('surname'));
-    const clubArray = (urlParams.getAll('club'));
-    const genderArray = (urlParams.getAll('gender'));
-    const weightArray = (urlParams.getAll('weight'));
-    const birthYearArray = (urlParams.getAll('birth_year'));
-    var athleteArray = [];
-    const ath = new Object();
-
-    for(var i = 0; i<idArray.length; i++){
-        ath.id=idArray[i];
-        ath.name=nameArray[i];
-        ath.surname=surnameArray[i];
-        ath.club=clubArray[i];
-        ath.gender=genderArray[i];
-        ath.weight=weightArray[i];
-        ath.birth_year=birthYearArray[i];
-        athleteArray.push(ath);
+athlete_router.get('/', async (req, res) => {
+    try{
+        // Function call
+        User.insertMany([
+            { id: 1, name: 'Steve', surname: 'Vinewood', clud: 'Judo Lavis', gender: 'M', weight: 80, birth_year: 2000},
+            { id: 1, name: 'Nick', surname: 'Jackinson', clud: 'Judo Pergine', gender: 'M', weight: 84, birth_year: 2000},
+            { id: 1, name: 'Andrea', surname: 'Mariani', clud: 'Judo Trento', gender: 'M', weight: 79, birth_year: 2000}
+        ]).then(function(){
+            console.log("Data inserted")  // Success
+        }).catch(function(error){
+            console.log(error)      // Failure
+        });
+    }catch(err){
+        console.log(status, err.message);
     }
-    
-    // Function call
-    Athlete.insertMany(athleteArray).then(function(){
-        console.log("Data inserted")  // Success
-    }).catch(function(error){
-        console.log(error)      // Failure
-    });
 })
 
 module.exports = athlete_router;
