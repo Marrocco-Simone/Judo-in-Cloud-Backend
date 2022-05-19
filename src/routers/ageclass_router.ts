@@ -1,5 +1,5 @@
 import express = require('express');
-import { Age_class } from '../schemas/AgeClass';
+import { AgeClass } from '../schemas/AgeClass';
 /** api for tournaments */
 export const ageclass_router = express.Router();
 
