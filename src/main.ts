@@ -49,7 +49,7 @@ app.use(express.json());
 app.use('/api/v1/athletes', [authenticate_token, athlete_router]);
 app.use('/api/v1/age_classes', [authenticate_token, ageclass_router]);
 app.use('/api/v1/tournaments', [authenticate_token, tournament_router]);
-app.use('/api/v1/matches', [authenticate_token, match_router]);
+app.use('/api/v1/match', [/* authenticate_token, */match_router]);
 app.use('/api/v1/auth', auth_router);
 
 // not found page
