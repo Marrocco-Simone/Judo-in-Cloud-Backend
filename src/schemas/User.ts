@@ -1,6 +1,6 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-export interface UserInterface {
+export export interface UserInterface {
   username: string;
   password: string;
   competition: string;

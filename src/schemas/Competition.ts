@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 
-interface CompetitionInterface {
+export interface CompetitionInterface {
   name: string;
   username: string;
   password: string;
