@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import 'dotenv/config';
 import { AgeClass, AgeClassInterface } from './schemas/AgeClass';
 import { Athlete, AthleteInterface } from './schemas/Athlete';
 import { Category, CategoryInterface } from './schemas/Category';
@@ -16,11 +17,19 @@ function getIds(obj: { _id: Types.ObjectId }[]) {
 function getCompetitions() {
   const competition_array: CompetitionInterface[] = [];
   competition_array.push({
-    username: 'admin',
-    password: 'password',
     name: 'Gara Lavis',
   });
   return competition_array;
+}
+
+function getUser(competition_ids: Types.ObjectId[]) {
+  const user_array: UserInterface[] = [];
+  user_array.push({
+    username: process.env.SYSADMIN_USERNAME,
+    password: process.env.SYSADMIN_PASSWORD,
+    competition: competition_ids[0],
+  })
+  return user_array;
 }
 
 function getAgeClasses(competition_ids: Types.ObjectId[]) {
@@ -74,25 +83,25 @@ function getAgeClasses(competition_ids: Types.ObjectId[]) {
 
 function getCategories(age_class_ids: Types.ObjectId[]) {
   const categories_array: CategoryInterface[] = [];
-  for (const age_class of age_class_ids) {
+  for (const age_class_id of age_class_ids) {
     categories_array.push(
       {
-        age_class,
+        age_class: age_class_id,
         max_weight: 60,
         gender: 'M',
       },
       {
-        age_class,
+        age_class: age_class_id,
         max_weight: 66,
         gender: 'M',
       },
       {
-        age_class,
+        age_class: age_class_id,
         max_weight: 52,
         gender: 'F',
       },
       {
-        age_class,
+        age_class: age_class_id,
         max_weight: 57,
         gender: 'F',
       }
@@ -105,9 +114,10 @@ async function main() {
   try {
     const competition = await Competition.insertMany(getCompetitions());
     const competition_ids = getIds(competition);
+    /* const user =  */await User.insertMany(getUser(competition_ids));
     const age_class = await AgeClass.insertMany(getAgeClasses(competition_ids));
     const age_class_ids = getIds(age_class);
-    const category = await Category.insertMany(getCategories(age_class_ids));
+    /* const category =  */await Category.insertMany(getCategories(age_class_ids));
   } catch (e) {
     console.log(e.message);
   }
