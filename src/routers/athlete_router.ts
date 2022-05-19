@@ -16,7 +16,7 @@ export const athlete_router = express.Router();
 athlete_router.get('/', async (req, res) => {
   try {
     const athlets = await Athlete.find();
-    success(res, athlets)
+    success(res, athlets);
   } catch (err) {
     error(res, err.message, 500);
   }
@@ -24,14 +24,24 @@ athlete_router.get('/', async (req, res) => {
 
 // Creating One
 athlete_router.post('/', async (req, res) => {
+  const body: {
+    name: string,
+    surname: string,
+    competition: string,
+    club: string,
+    gender: 'M'|'F',
+    weight: number,
+    birth_year: number
+  } = req.body;
+
   const athlete = new Athlete({
-    id: req.body.id,
-    name: req.body.name,
-    surname: req.body.surname,
-    club: req.body.club,
-    gender: req.body.gender,
-    weight: req.body.weight,
-    birth_year: req.body.birth_year
+    name: body.name,
+    surname: body.surname,
+    club: body.club,
+    competition: body.competition,
+    gender: body.gender,
+    weight: body.weight,
+    birth_year: body.birth_year
   });
   try {
     const new_athlete = await athlete.save();
