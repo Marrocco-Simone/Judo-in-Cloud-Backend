@@ -1,9 +1,9 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
-export export interface UserInterface {
+export interface UserInterface {
   username: string;
   password: string;
-  competition: string;
+  competition: Types.ObjectId;
 }
 
 const user_schema = new Schema<UserInterface>({

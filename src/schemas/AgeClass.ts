@@ -1,8 +1,8 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
 export interface AgeClassInterface {
   max_age: number;
-  competition: string;
+  competition: Types.ObjectId;
   name: string;
   closed: boolean;
   params: {

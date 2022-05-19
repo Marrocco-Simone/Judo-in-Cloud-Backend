@@ -1,14 +1,14 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
 export interface AthleteInterface {
   name: string;
   surname: string;
-  competition: string;
+  competition: Types.ObjectId;
   club: string;
   gender: 'M'|'F';
   weight: number;
   birth_year: number;
-  category: string;
+  category: Types.ObjectId;
 }
 
 const athlete_schema = new Schema<AthleteInterface>({

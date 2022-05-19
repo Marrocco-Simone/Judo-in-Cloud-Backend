@@ -1,9 +1,9 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 export interface MatchInterface {
-  white_athlete: string;
-  red_athlete: string;
-  winner_athlete: string;
-  tournament: string;
+  white_athlete: Types.ObjectId;
+  red_athlete: Types.ObjectId;
+  winner_athlete: Types.ObjectId;
+  tournament: Types.ObjectId;
   is_started: boolean;
   is_over: boolean;
   match_type: number;
