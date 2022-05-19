@@ -1,13 +1,15 @@
-import mongoose, { mongo, Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import bcrypt = require('bcrypt');
 import 'dotenv/config';
 import { AgeClass, AgeClassInterface } from './schemas/AgeClass';
 import { Athlete, AthleteInterface } from './schemas/Athlete';
 import { Category, CategoryInterface } from './schemas/Category';
 import { Competition, CompetitionInterface } from './schemas/Competition';
-import { Match, MatchInterface } from './schemas/Match';
-import { Tournament, TournamentInterface } from './schemas/Tournament';
+/* import { Match, MatchInterface } from './schemas/Match'; */
+/* import { Tournament, TournamentInterface } from './schemas/Tournament'; */
 import { User, UserInterface } from './schemas/User';
+
+const random = (max: number, min = 0) => (Math.random() % (max - min)) + min;
 
 function getIds(obj: { _id: Types.ObjectId }[]) {
   const ids_array: Types.ObjectId[] = [];
@@ -274,13 +276,78 @@ function getAthetes(
     'Cecilia',
     'Isabel',
   ];
+  const cities = [
+    'Roma',
+    'Milano',
+    'Napoli',
+    'Torino',
+    'Palermo',
+    'Genova',
+    'Bologna',
+    'Firenze',
+    'Bari',
+    'Catania',
+    'Venezia',
+    'Verona',
+    'Messina',
+    'Padova',
+    'Trieste',
+    'Taranto',
+    'Brescia',
+    'Parma',
+    'Prato',
+    'Modena',
+    'Reggio Calabria',
+    'Reggio Emilia',
+    'Perugia',
+    'Ravenna',
+    'Livorno',
+    'Cagliari',
+    'Foggia',
+    'Rimini',
+    'Salerno',
+    'Ferrara',
+    'Sassari',
+    'Latina',
+    'Giugliano in Campania',
+    'Monza',
+    'Siracusa',
+    'Pescara',
+    'Bergamo',
+    'Forlì',
+    'Trento',
+    'Vicenza',
+    'Terni',
+    'Bolzano',
+    'Novara',
+    'Piacenza',
+    'Ancona',
+    'Andria',
+    'Arezzo',
+    'Udine',
+    'Cesena',
+    'Lecce',
+  ];
   const athletes_array: AthleteInterface[] = [];
   for (const cat of category) {
-    for (let i = 0; i < Math.random()%12+5 ; i++) {
-
+    const dim = random(17, 5);
+    for (let i = 0; i < dim; i++) {
+      athletes_array.push({
+        name:
+          cat.gender === 'M'
+            ? male_names[random(50)]
+            : female_names[random(50)],
+        surname: surnames[random(50)],
+        competition: competition_ids[0],
+        club: `Judo ${cities[random(50)]}`,
+        gender: cat.gender,
+        weight: cat.max_weight - 1,
+        birth_year: 1970,
+        category: cat._id,
+      });
     }
   }
-  for (const category of female_category_ids) return athletes_array;
+  return athletes_array;
 }
 
 async function main() {
@@ -289,21 +356,21 @@ async function main() {
     mongoose.connect(mongo_url);
     const competition = await Competition.insertMany(getCompetitions());
     const competition_ids = getIds(competition);
-    console.log('created Competition:', competition_ids);
+    console.log('created Competition:', competition_ids.length);
     const user = await User.insertMany(await getUser(competition_ids));
     const user_ids = getIds(user);
-    console.log('created User:', user_ids);
+    console.log('created User:', user_ids.length);
     const age_class = await AgeClass.insertMany(getAgeClasses(competition_ids));
     const age_class_ids = getIds(age_class);
-    console.log('created AgeClass:', age_class_ids);
+    console.log('created AgeClass:', age_class_ids.length);
     const category = await Category.insertMany(getCategories(age_class_ids));
     const category_ids = getIds(category);
-    console.log('created Category:', category_ids);
+    console.log('created Category:', category_ids.length);
     const athlete = await Athlete.insertMany(
       getAthetes(competition_ids, category)
     );
     const athlete_ids = getIds(athlete);
-    console.log('created Athlete:', athlete_ids);
+    console.log('created Athlete:', athlete_ids.length);
   } catch (e) {
     console.log(e.message);
   }
