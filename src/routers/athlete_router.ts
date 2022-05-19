@@ -1,4 +1,5 @@
 // export {}; //needed or typescripts gives some strange errors
+import { error, success } from '../controllers/base_controller';
 import { Athlete } from '../schemas/Athlete';
 const express = require('express');
 
@@ -15,9 +16,9 @@ export const athlete_router = express.Router();
 athlete_router.get('/', async (req, res) => {
   try {
     const athlets = await Athlete.find();
-    res.json(athlets);
+    success(res, athlets)
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    error(res, err.message, 500);
   }
 });
 
@@ -33,10 +34,10 @@ athlete_router.post('/', async (req, res) => {
     birth_year: req.body.birth_year
   });
   try {
-    const newAthlete = await athlete.save();
-    res.status(201).json(newAthlete);
+    const new_athlete = await athlete.save();
+    success(res, new_athlete);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    error(res, err.message, 400);
   }
 });
 
@@ -54,6 +55,6 @@ athlete_router.get('/', async () => {
       console.log(error); // Failure
     });
   } catch (err) {
-    console.log(status, err.message);
+    console.log(500, err.message);
   }
 });
