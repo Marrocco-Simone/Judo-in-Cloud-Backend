@@ -16,7 +16,7 @@ export const authenticate_token: express.RequestHandler = (req, res, next) => {
     const user_id = (user as jwt.JwtPayload)._id;
     try {
       const user = await User.findById(user_id);
-      await user.populate('competition_id');
+      await user.populate('competition');
       req.user = user;
     } catch (err) {
       return error(res, 'Errore durante l\'autenticazione');
