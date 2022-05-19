@@ -15,8 +15,8 @@ export const athlete_router = express.Router();
 // Getting all
 athlete_router.get('/', async (req, res) => {
   try {
-    const athlets = await Athlete.find();
-    success(res, athlets);
+    const athletes = await Athlete.find();
+    success(res, athletes);
   } catch (err) {
     error(res, err.message, 500);
   }
@@ -48,23 +48,5 @@ athlete_router.post('/', async (req, res) => {
     success(res, new_athlete);
   } catch (err) {
     error(res, err.message, 400);
-  }
-});
-
-// Creating Many
-athlete_router.get('/', async () => {
-  try {
-    // Function call
-    Athlete.insertMany([
-      { id: 1, name: 'Steve', surname: 'Vinewood', clud: 'Judo Lavis', gender: 'M', weight: 80, birth_year: 2000 },
-      { id: 1, name: 'Nick', surname: 'Jackinson', clud: 'Judo Pergine', gender: 'M', weight: 84, birth_year: 2000 },
-      { id: 1, name: 'Andrea', surname: 'Mariani', clud: 'Judo Trento', gender: 'M', weight: 79, birth_year: 2000 }
-    ]).then(function() {
-      console.log('Data inserted'); // Success
-    }).catch(function(error) {
-      console.log(error); // Failure
-    });
-  } catch (err) {
-    console.log(500, err.message);
   }
 });
