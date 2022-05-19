@@ -4,13 +4,13 @@ import { ageclass_router } from './routers/ageclass_router';
 import { tournament_router } from './routers/tournament_router';
 import { match_router } from './routers/match_router';
 import { auth_router } from './routers/auth_router';
-import jwt = require('jsonwebtoken');
 
 import express = require('express');
 import cors = require('cors');
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
+import { UserInterface } from './schemas/User';
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URL);
 declare global {
   namespace Express {
     interface Request {
-      user: jwt.JwtPayload | string;
+      user: UserInterface;
     }
   }
 }
