@@ -43,7 +43,7 @@ athlete_router.post('/', async (req, res) => {
 athlete_router.get('/', async (req, res) => {
     try{
         // Function call
-        User.insertMany([
+        Athletes.insertMany([
             { id: 1, name: 'Steve', surname: 'Vinewood', clud: 'Judo Lavis', gender: 'M', weight: 80, birth_year: 2000},
             { id: 1, name: 'Nick', surname: 'Jackinson', clud: 'Judo Pergine', gender: 'M', weight: 84, birth_year: 2000},
             { id: 1, name: 'Andrea', surname: 'Mariani', clud: 'Judo Trento', gender: 'M', weight: 79, birth_year: 2000}
