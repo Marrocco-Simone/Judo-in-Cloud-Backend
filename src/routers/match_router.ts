@@ -3,6 +3,7 @@ import { Match } from '../schemas/Match';
 /* TODO Elimina */ import { Category } from '../schemas/Category';
 import { Athlete } from '../schemas/Athlete';
 import { success, error, fail } from '../controllers/base_controller';
+import { Types } from 'mongoose';
 /** api for matches */
 export const match_router = express.Router();
 
@@ -48,7 +49,7 @@ match_router.post('/:match_id', async (req, res) => {
       };
     } = req.body;
     if (body.winner_athlete && Athlete.exists({ _id: body.winner_athlete })) {
-      match.winner_athlete = body.winner_athlete;
+      match.winner_athlete = new Types.ObjectId(body.winner_athlete);
     }
     if (body.is_started) match.is_started = body.is_started;
     if (body.is_over) match.is_over = body.is_over;
