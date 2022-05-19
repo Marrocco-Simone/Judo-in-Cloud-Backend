@@ -1,5 +1,6 @@
 import express = require('express');
 import { Match } from '../schemas/Match';
+import { Athlete } from '../schemas/Athlete';
 import { success, error, fail } from '../controllers/base_controller';
 /** api for matches */
 export const match_router = express.Router();
@@ -14,6 +15,7 @@ match_router.get('/:match_id', async (req, res) => {
     if (!match) return fail(res, 'Match not found', 404);
     success(res, match);
   } catch (e) {
+    console.log(e);
     error(res, e.message);
   }
 });
@@ -37,7 +39,9 @@ match_router.post('/:match_id', async (req, res) => {
         red_penalties: number;
       };
     } = req.body;
-    if (body.winner_athlete) match.winner_athlete = body.winner_athlete;
+    if (body.winner_athlete && Athlete.exists({ _id: body.winner_athlete })) {
+      match.winner_athlete = body.winner_athlete;
+    }
     if (body.is_started) match.is_started = body.is_started;
     if (body.is_over) match.is_over = body.is_over;
     if (body.match_scores) match.match_scores = body.match_scores;
