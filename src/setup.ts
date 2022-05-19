@@ -12,7 +12,7 @@ if ([mongo_url, sysadmin_username, sysadmin_password].includes(undefined)) {
     'and update it with your configuration, then restart.');
 }
 
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(mongo_url);
 
 async function createSysAdmin() {
   const sys_admin = await User.findOne({ username: sysadmin_username });
