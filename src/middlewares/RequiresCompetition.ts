@@ -6,7 +6,7 @@ export const requires_competition: express.RequestHandler = (req, res, next) => 
     console.error('[MIDDLEWARE ERROR] requires_competition called but user not populated, please check the order of middlewares');
     return error(res, 'Errore interno');
   }
-  if (!req.user.competition_id) {
+  if (!req.user.competition) {
     return fail(res, 'Per usare questa funzionalità devi essere parte di una competizione');
   }
   next();
