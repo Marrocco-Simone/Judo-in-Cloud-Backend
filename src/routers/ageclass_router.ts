@@ -7,7 +7,7 @@ export const ageclass_router = express.Router();
 // Getting all
 ageclass_router.get('/params', async (req, res) => {
     try{
-        const age_class = await Age_class.find();
+        const age_class = await AgeClass.find();
         res.json(age_class);
     }catch (err){
         res.status(500).json({ message: err.message })
@@ -16,7 +16,7 @@ ageclass_router.get('/params', async (req, res) => {
 
 // Update One
 ageclass_router.post('/params', async (req, res) => {
-    const age_class = new Age_class({
+    const age_class = new AgeClass({
         _id: SchemaTypes.ObjectId,
         max_age: Number,
         competition_id: {
@@ -29,7 +29,7 @@ ageclass_router.post('/params', async (req, res) => {
     })
     try{
         //const newAthlete = await athlete.save();
-        var a_c = new Age_class({
+        var a_c = new AgeClass({
             max_age: req.max_age,
             competition_id: req.competition_id,
             name: req.name,
@@ -39,7 +39,7 @@ ageclass_router.post('/params', async (req, res) => {
 
         var updatedAge_class = a_c.toObject();
 
-        Age_class.update({_id: age_class._id}, updatedAge_class, {upsert: true}, (err) => {
+        AgeClass.update({_id: age_class._id}, updatedAge_class, {upsert: true}, (err) => {
             res.status(500).json(err.message);
         })
         res.status(201).json(updatedAge_class)
