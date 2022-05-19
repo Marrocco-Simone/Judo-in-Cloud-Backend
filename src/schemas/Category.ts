@@ -1,6 +1,6 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-interface CategoryInterface {
+export interface CategoryInterface {
   age_class: string;
   max_weight: string;
   gender: 'M'|'F';

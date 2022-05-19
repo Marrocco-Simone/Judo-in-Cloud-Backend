@@ -1,6 +1,6 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-interface TournamentInterface {
+export interface TournamentInterface {
   competition: string;
   category: string;
   tatami_number: number;
