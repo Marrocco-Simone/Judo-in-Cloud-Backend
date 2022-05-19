@@ -1,10 +1,10 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
 interface CategoryInterface {
-  _id: String,
-  age_class_id: String,
-  max_weight: String,
-  gender: 'M'|'F',
+  _id: String;
+  age_class_id: String;
+  max_weight: String;
+  gender: 'M' | 'F';
 }
 
 const category_schema = new Schema<CategoryInterface>({

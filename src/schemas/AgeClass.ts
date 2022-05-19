@@ -1,30 +1,19 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-interface AgeClassParamsInterface {
-  match_time: Number,
-  supplemental_match_time: Number,
-  ippon_to_win: Number,
-  wazaari_to_win: Number,
-  ippon_timer: Number,
-  wazaari_timer: Number,
-}
-
-const age_class_params_schema = new Schema<AgeClassParamsInterface>({
-  match_time: Number,
-  supplemental_match_time: Number,
-  ippon_to_win: Number,
-  wazaari_to_win: Number,
-  ippon_timer: Number,
-  wazaari_timer: Number,
-});
-
 interface AgeClassInterface {
-  _id: String,
-  max_age: Number,
-  competition_id: String,
-  name: String,
-  closed: Boolean,
-  params: AgeClassParamsInterface,
+  _id: String;
+  max_age: Number;
+  competition_id: String;
+  name: String;
+  closed: Boolean;
+  params: {
+    match_time: Number;
+    supplemental_match_time: Number;
+    ippon_to_win: Number;
+    wazaari_to_win: Number;
+    ippon_timer: Number;
+    wazaari_timer: Number;
+  };
 }
 
 const age_class_schema = new Schema<AgeClassInterface>({
@@ -32,11 +21,18 @@ const age_class_schema = new Schema<AgeClassInterface>({
   max_age: Number,
   competition_id: {
     type: SchemaTypes.ObjectId,
-    ref: 'Competition'
+    ref: 'Competition',
   },
   name: String,
   closed: Boolean,
-  params: age_class_params_schema,
+  params: {
+    match_time: Number,
+    supplemental_match_time: Number,
+    ippon_to_win: Number,
+    wazaari_to_win: Number,
+    ippon_timer: Number,
+    wazaari_timer: Number,
+  },
 });
 
 export const age_class = model('AgeClass', age_class_schema);
