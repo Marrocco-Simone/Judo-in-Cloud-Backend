@@ -1,4 +1,5 @@
 import express = require('express');
+import { error, success } from '../controllers/base_controller';
 import { Tournament } from '../schemas/Tournament';
 /** api for tournaments */
 export const tournament_router = express.Router();
@@ -7,8 +8,8 @@ export const tournament_router = express.Router();
 tournament_router.get('/', async (req, res) => {
   try {
     const tournaments = await Tournament.find();
-    res.json(tournaments);
+    success(res, tournaments);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    error(res, err.message, 500);
   }
 });
