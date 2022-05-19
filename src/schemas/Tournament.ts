@@ -1,14 +1,14 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
-interface TournamentInterface {
-  competition: string;
-  category: string;
+export interface TournamentInterface {
+  competition: Types.ObjectId;
+  category: Types.ObjectId;
   tatami_number: number;
   finished: boolean;
-  athletes: string[];
-  winners_bracket: string[];
-  recovered_bracket_1: string[];
-  recovered_bracket_2: string[];
+  athletes: Types.ObjectId[];
+  winners_bracket: Types.ObjectId[];
+  recovered_bracket_1: Types.ObjectId[];
+  recovered_bracket_2: Types.ObjectId[];
 }
 
 const tournament_schema = new Schema<TournamentInterface>({
