@@ -7,13 +7,13 @@ const express = require('express');
 //    res.json({success: 1});
 // });
 
-const athlete_router = express.Router();
-import {Athelts} from '../schemas/Athlete';
+export const athlete_router = express.Router();
+import {Athlete} from '../schemas/Athlete';
 
 // Getting all
 athlete_router.get('/', async (req, res) => {
     try{
-        const athlets = await Athlets.find();
+        const athlets = await Athlete.find();
         res.json(athlets);
     }catch (err){
         res.status(500).json({ message: err.message })
@@ -22,7 +22,7 @@ athlete_router.get('/', async (req, res) => {
 
 // Creating One
 athlete_router.post('/', async (req, res) => {
-    const athlete = new Athlets({
+    const athlete = new Athlete({
         id: req.body.id,
         name: req.body.name,
         surname: req.body.surname,
@@ -43,7 +43,7 @@ athlete_router.post('/', async (req, res) => {
 athlete_router.get('/', async (req, res) => {
     try{
         // Function call
-        Athletes.insertMany([
+        Athlete.insertMany([
             { id: 1, name: 'Steve', surname: 'Vinewood', clud: 'Judo Lavis', gender: 'M', weight: 80, birth_year: 2000},
             { id: 1, name: 'Nick', surname: 'Jackinson', clud: 'Judo Pergine', gender: 'M', weight: 84, birth_year: 2000},
             { id: 1, name: 'Andrea', surname: 'Mariani', clud: 'Judo Trento', gender: 'M', weight: 79, birth_year: 2000}
@@ -56,5 +56,3 @@ athlete_router.get('/', async (req, res) => {
         console.log(status, err.message);
     }
 })
-
-module.exports = athlete_router;
