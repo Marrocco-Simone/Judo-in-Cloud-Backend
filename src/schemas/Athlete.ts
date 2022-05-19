@@ -3,18 +3,18 @@ import { model, Schema, SchemaTypes } from 'mongoose';
 interface AthleteInterface {
   name: string;
   surname: string;
-  competition_id: string;
+  competition: string;
   club: string;
   gender: 'M'|'F';
   weight: number;
   birth_year: number;
-  category_id: string;
+  category: string;
 }
 
 const athlete_schema = new Schema<AthleteInterface>({
   name: String,
   surname: String,
-  competition_id: {
+  competition: {
     type: SchemaTypes.ObjectId,
     ref: 'Competition',
   },
@@ -22,7 +22,7 @@ const athlete_schema = new Schema<AthleteInterface>({
   gender: String,
   weight: Number,
   birth_year: Number,
-  category_id: {
+  category: {
     type: SchemaTypes.ObjectId,
     ref: 'Category',
   },
