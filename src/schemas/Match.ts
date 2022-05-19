@@ -1,5 +1,5 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
-interface MatchInterface {
+export interface MatchInterface {
   white_athlete: string;
   red_athlete: string;
   winner_athlete: string;

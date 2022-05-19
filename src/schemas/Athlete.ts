@@ -1,6 +1,6 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-interface AthleteInterface {
+export interface AthleteInterface {
   name: string;
   surname: string;
   competition: string;

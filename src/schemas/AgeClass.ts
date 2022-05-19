@@ -1,6 +1,6 @@
 import { model, Schema, SchemaTypes } from 'mongoose';
 
-interface AgeClassInterface {
+export interface AgeClassInterface {
   max_age: number;
   competition: string;
   name: string;
