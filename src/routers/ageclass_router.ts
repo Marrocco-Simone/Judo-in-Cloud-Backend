@@ -1,6 +1,8 @@
 import express = require('express');
 import { AgeClass } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
+import { Category } from '../schemas/Category';
+import { Athlete } from '../schemas/Athlete';
 /** api for matches */
 export const ageclass_router = express.Router();
 
@@ -50,7 +52,15 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
 
     const new_age_class = await AgeClass.updateOne({ _id: age_class_id }, { $set: params_to_set }, { upsert: true });
 
-    // TODO: add conditions on closed age class
+    if (closed) {
+      const categories = await Category.find({ age_class: age_class_id });
+
+      for (const category of categories) {
+        const category_athletes = await Athlete.find({ category });
+
+        console.log({ category_athletes });
+      }
+    }
 
     success(res, new_age_class);
   } catch (e) {
