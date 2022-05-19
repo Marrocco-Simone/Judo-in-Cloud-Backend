@@ -59,6 +59,38 @@ async function main() {
         }
       }
     ]);
+    const category = await Category.insertMany([
+      {
+        age_class: age_class[0]._id,
+        max_weight: 60,
+        gender: 'M',
+      },
+      {
+        age_class: age_class[0]._id,
+        max_weight: 66,
+        gender: 'M',
+      },
+      {
+        age_class: age_class[1]._id,
+        max_weight: 60,
+        gender: 'M',
+      },
+      {
+        age_class: age_class[1]._id,
+        max_weight: 66,
+        gender: 'M',
+      },
+      {
+        age_class: age_class[2]._id,
+        max_weight: 60,
+        gender: 'M',
+      },
+      {
+        age_class: age_class[2]._id,
+        max_weight: 66,
+        gender: 'M',
+      },
+    ])
   } catch (e) {
     console.log(e.message);
   }
