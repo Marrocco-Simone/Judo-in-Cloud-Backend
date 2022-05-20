@@ -1,9 +1,17 @@
 import express = require('express');
 import { Match } from '../schemas/Match';
+/* TODO Elimina */ import { Category } from '../schemas/Category';
 import { Athlete } from '../schemas/Athlete';
 import { success, error, fail } from '../controllers/base_controller';
 /** api for matches */
 export const match_router = express.Router();
+
+/* TODO Elimina */ match_router.get('/create_matches', async (req, res) => {
+  const category = await Category.findOne();
+  const athletes = await Athlete.find({ category: category._id }).populate('category');
+  
+  success(res, athletes);
+});
 
 match_router.get('/:match_id', async (req, res) => {
   try {
@@ -26,7 +34,7 @@ match_router.post('/:match_id', async (req, res) => {
     const match = await Match.findById(match_id);
     if (!match) return fail(res, 'Match not found', 404);
     const body: {
-      winner_athlete: string,
+      winner_athlete: string;
       is_started: boolean;
       is_over: boolean;
       match_scores: {
