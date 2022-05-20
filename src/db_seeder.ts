@@ -9,7 +9,7 @@ import { Competition, CompetitionInterface } from './schemas/Competition';
 /* import { Tournament, TournamentInterface } from './schemas/Tournament'; */
 import { User, UserInterface } from './schemas/User';
 
-const random = (max: number, min = 0) => (Math.random() % (max - min)) + min;
+const random = (max: number, min = 0) => (Math.floor(Math.random() * (max - min))) + min;
 
 function getIds(obj: { _id: Types.ObjectId }[]) {
   const ids_array: Types.ObjectId[] = [];
