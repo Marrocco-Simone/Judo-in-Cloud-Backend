@@ -12,12 +12,12 @@ export const match_router = express.Router();
 match_router.get('/:match_id', async (req, res) => {
   try {
     const match_id = req.params.match_id;
-    if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Match_id not valid', 400);
+    if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Id del match non valido', 400);
     const match = await Match.findById(match_id)
       .populate('white_athlete')
       .populate('red_athlete')
       .populate('winner_athlete');
-    if (!match) return fail(res, 'Match not found', 404);
+    if (!match) return fail(res, 'Incontro non trovato', 404);
     /* final way should use the tournament id */
     /* const tournament = await Tournament.findById(match.tournament);
     const category = await Category.findById(tournament.category); */
