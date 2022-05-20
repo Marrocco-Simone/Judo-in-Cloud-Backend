@@ -22,10 +22,11 @@ match_router.get('/:match_id', async (req, res) => {
     const category = await Category.findById(tournament.category); */
     const athlete = await Athlete.findById(match.white_athlete._id);
     const category = await Category.findById(athlete.category);
-    const { params } = await AgeClass.findById(category.age_class);
+    const age_class = await AgeClass.findById(category.age_class);
     const result = {
       ...match.toObject(),
-      params
+      params: age_class.params,
+      category_name: `${age_class.name} U${category.max_weight}`,
     };
     success(res, result);
   } catch (e) {
