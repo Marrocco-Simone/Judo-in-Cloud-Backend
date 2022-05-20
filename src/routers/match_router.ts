@@ -23,12 +23,12 @@ match_router.get('/:match_id', async (req, res) => {
     const athlete = await Athlete.findById(match.white_athlete._id);
     const category = await Category.findById(athlete.category);
     const age_class = await AgeClass.findById(category.age_class);
-    const result = {
+    const match_data = {
       ...match.toObject(),
       params: age_class.params,
       category_name: `${age_class.name} U${category.max_weight}`,
     };
-    success(res, result);
+    success(res, match_data);
   } catch (e) {
     console.log(e);
     error(res, e.message);
