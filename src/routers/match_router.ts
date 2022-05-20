@@ -1,11 +1,11 @@
 import express = require('express');
 import { Match } from '../schemas/Match';
-import { Athlete, AthleteInterface } from '../schemas/Athlete';
-import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
+import { Athlete } from '../schemas/Athlete';
+import { AgeClass } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Types } from 'mongoose';
 import { Category } from '../schemas/Category';
-import { Tournament } from '../schemas/Tournament';
+/* import { Tournament } from '../schemas/Tournament'; */
 /** api for matches */
 export const match_router = express.Router();
 
