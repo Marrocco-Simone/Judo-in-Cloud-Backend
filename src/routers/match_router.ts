@@ -27,7 +27,7 @@ match_router.post('/:match_id', async (req, res) => {
     const match = await Match.findById(match_id);
     if (!match) return fail(res, 'Match not found', 404);
     const body: {
-      winner_athlete: string,
+      winner_athlete: string;
       is_started: boolean;
       is_over: boolean;
       match_scores: {
