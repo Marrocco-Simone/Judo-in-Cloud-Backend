@@ -1,6 +1,7 @@
 import express = require('express');
 import { AgeClass } from '../schemas/AgeClass';
 import { SchemaTypes } from 'mongoose';
+import { error, success } from '../controllers/base_controller';
 /** api for tournaments */
 export const ageclass_router = express.Router();
 
@@ -28,7 +29,7 @@ ageclass_router.post('/params', async (req, res) => {
     params: AgeClass,
   });
   try {
-    const a_c = new AgeClass({
+    const ageClassBodyParameters = new AgeClass({
       max_age: req.body.max_age,
       competition_id: req.body.competition_id,
       name: req.body.name,
@@ -36,7 +37,7 @@ ageclass_router.post('/params', async (req, res) => {
       params: req.body.params
     });
 
-    const updatedAge_class = a_c.toObject();
+    const updatedAge_class = ageClassBodyParameters.toObject();
 
     AgeClass.updateOne({ _id: age_class._id }, updatedAge_class, { upsert: true }, (err) => {
       res.status(500).json(err.message);
@@ -46,3 +47,12 @@ ageclass_router.post('/params', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
+ageclass_router.get('/params/:ageclass', async (req, res) => {
+  AgeClass.findOne({ _id: 'ageclass' }, 'params', function (err, ageClassParameters) {
+    if (err) error(res, err.message, 500);
+    // Prints "Space Ghost is a talk show host".
+    success(res, ageClassParameters, 200);
+  });
+});
+
