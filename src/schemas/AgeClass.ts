@@ -1,29 +1,18 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
-interface AgeClassParamsInterface {
-  match_time: number;
-  supplemental_match_time: number;
-  ippon_to_win: number;
-  wazaari_to_win: number;
-  ippon_timer: number;
-  wazaari_timer: number;
-}
-
-const age_class_params_schema = new Schema<AgeClassParamsInterface>({
-  match_time: Number,
-  supplemental_match_time: Number,
-  ippon_to_win: Number,
-  wazaari_to_win: Number,
-  ippon_timer: Number,
-  wazaari_timer: Number,
-});
-
-interface AgeClassInterface {
+export interface AgeClassInterface {
   max_age: number;
-  competition: string;
+  competition: Types.ObjectId;
   name: string;
   closed: boolean;
-  params: AgeClassParamsInterface;
+  params: {
+    match_time: number;
+    supplemental_match_time: number;
+    ippon_to_win: number;
+    wazaari_to_win: number;
+    ippon_timer: number;
+    wazaari_timer: number;
+  };
 }
 
 const age_class_schema = new Schema<AgeClassInterface>({
@@ -34,7 +23,14 @@ const age_class_schema = new Schema<AgeClassInterface>({
   },
   name: String,
   closed: Boolean,
-  params: age_class_params_schema,
+  params: {
+    match_time: Number,
+    supplemental_match_time: Number,
+    ippon_to_win: Number,
+    wazaari_to_win: Number,
+    ippon_timer: Number,
+    wazaari_timer: Number,
+  },
 });
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
