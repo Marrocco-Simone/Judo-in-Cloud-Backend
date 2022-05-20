@@ -26,7 +26,7 @@ export const login: RequestHandler = async function(req, res) {
     const jwt_payload = { _id: user._id, username: user.username };
     // token that expires in 24 hours
     const access_token = jwt.sign(jwt_payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
-    return success(res, { access_token });
+    return success(res, { access_token, user });
   } catch (err) {
     // mongoose or bcrypt error
     return error(res, 'Errore interno durante il login');
