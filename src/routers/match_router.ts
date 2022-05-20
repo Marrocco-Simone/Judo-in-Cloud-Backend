@@ -12,6 +12,7 @@ export const match_router = express.Router();
 match_router.get('/:match_id', async (req, res) => {
   try {
     const match_id = req.params.match_id;
+    if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Match_id not valid', 400);
     const match = await Match.findById(match_id)
       .populate('white_athlete')
       .populate('red_athlete')
@@ -30,7 +31,6 @@ match_router.get('/:match_id', async (req, res) => {
     };
     success(res, match_data);
   } catch (e) {
-    console.log(e);
     error(res, e.message);
   }
 });
