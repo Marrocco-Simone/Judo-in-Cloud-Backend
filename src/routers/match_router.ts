@@ -1,8 +1,11 @@
 import express = require('express');
 import { Match } from '../schemas/Match';
-import { Athlete } from '../schemas/Athlete';
+import { Athlete, AthleteInterface } from '../schemas/Athlete';
+import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Types } from 'mongoose';
+import { Category } from '../schemas/Category';
+import { Tournament } from '../schemas/Tournament';
 /** api for matches */
 export const match_router = express.Router();
 
@@ -14,7 +17,17 @@ match_router.get('/:match_id', async (req, res) => {
       .populate('red_athlete')
       .populate('winner_athlete');
     if (!match) return fail(res, 'Match not found', 404);
-    success(res, match);
+    /* final way should use the tournament id */
+    /* const tournament = await Tournament.findById(match.tournament);
+    const category = await Category.findById(tournament.category); */
+    const athlete = await Athlete.findById(match.white_athlete._id);
+    const category = await Category.findById(athlete.category);
+    const { params } = await AgeClass.findById(category.age_class);
+    const result = {
+      ...match.toObject(),
+      params
+    };
+    success(res, result);
   } catch (e) {
     console.log(e);
     error(res, e.message);
