@@ -12,7 +12,7 @@ export const match_router = express.Router();
 match_router.get('/:match_id', async (req, res) => {
   try {
     const match_id = req.params.match_id;
-    if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Id del match non valido', 400);
+    if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Incontro non trovato', 400);
     const match = await Match.findById(match_id)
       .populate('white_athlete')
       .populate('red_athlete')
