@@ -54,12 +54,13 @@ match_router.post('/:match_id', async (req, res) => {
         red_penalties: number;
       };
     } = req.body;
-    if (body.winner_athlete && Athlete.exists({ _id: body.winner_athlete })) {
-      match.winner_athlete = new Types.ObjectId(body.winner_athlete);
-    }
     if (body.is_started) match.is_started = body.is_started;
     if (body.is_over) match.is_over = body.is_over;
     if (body.match_scores) match.match_scores = body.match_scores;
+    if (body.winner_athlete && Athlete.exists({ _id: body.winner_athlete })) {
+      match.winner_athlete = new Types.ObjectId(body.winner_athlete);
+      // Girardi
+    }
     await match.save();
     success(res, match);
   } catch (e) {
