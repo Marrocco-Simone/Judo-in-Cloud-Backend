@@ -1,18 +1,10 @@
 import express = require('express');
 import { Match } from '../schemas/Match';
-/* TODO Elimina */ import { Category } from '../schemas/Category';
 import { Athlete } from '../schemas/Athlete';
 import { success, error, fail } from '../controllers/base_controller';
 import { Types } from 'mongoose';
 /** api for matches */
 export const match_router = express.Router();
-
-/* TODO Elimina */ match_router.get('/create_matches', async (req, res) => {
-  const category = await Category.findOne();
-  const athletes = await Athlete.find({ category: category._id }).populate('category');
-  
-  success(res, athletes);
-});
 
 match_router.get('/:match_id', async (req, res) => {
   try {
