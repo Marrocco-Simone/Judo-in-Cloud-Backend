@@ -32,3 +32,11 @@ export const login: RequestHandler = async function(req, res) {
     return error(res, 'Errore interno durante il login');
   }
 };
+
+export const me: RequestHandler = async function(req, res) {
+  if (!req.user) {
+    console.error('[AUTH CONTROLLER] auth/me does not have user in the request');
+    return error(res, 'Errore interno');
+  }
+  return success(res, req.user);
+};
