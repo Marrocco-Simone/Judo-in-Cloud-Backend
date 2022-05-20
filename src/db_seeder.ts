@@ -5,11 +5,13 @@ import { AgeClass, AgeClassInterface } from './schemas/AgeClass';
 import { Athlete, AthleteInterface } from './schemas/Athlete';
 import { Category, CategoryInterface } from './schemas/Category';
 import { Competition, CompetitionInterface } from './schemas/Competition';
+import { Match, MatchInterface } from './schemas/Match';
 /* import { Match, MatchInterface } from './schemas/Match'; */
 /* import { Tournament, TournamentInterface } from './schemas/Tournament'; */
 import { User, UserInterface } from './schemas/User';
 
-const random = (max: number, min = 0) => (Math.floor(Math.random() * (max - min))) + min;
+const random = (max: number, min = 0) =>
+  Math.floor(Math.random() * (max - min)) + min;
 
 function getIds(obj: { _id: Types.ObjectId }[]) {
   const ids_array: Types.ObjectId[] = [];
@@ -350,6 +352,33 @@ function getAthetes(
   return athletes_array;
 }
 
+/* TODO elimina. Utile solo per ora finche' non chiudiamo una classe e creiamo i tornei */
+function getMatches(
+  category_ids: Types.ObjectId[],
+  athlete: (mongoose.Document<unknown, any, AthleteInterface> & AthleteInterface & {
+    _id: Types.ObjectId;
+})[]
+) {
+  const category = category_ids[0];
+  const this_cat_athlete = athlete.filter((ath) => ath.category === category);
+  const matches_array: MatchInterface[] = [];
+  for (let i = 0; i < 5; i++) {
+    for (let j = i + 1; j < 5; j++) {
+      matches_array.push({
+        white_athlete: this_cat_athlete[i]._id,
+        red_athlete: this_cat_athlete[j]._id,
+        winner_athlete: null,
+        is_started: false,
+        is_over: false,
+        match_scores: null,
+        match_type: null,
+        tournament: null,
+      });
+    }
+  }
+  return matches_array;
+}
+
 async function main() {
   const mongo_url = process.env.MONGO_URL;
   try {
@@ -371,6 +400,9 @@ async function main() {
     );
     const athlete_ids = getIds(athlete);
     console.log('created Athlete:', athlete_ids.length);
+    const match = await Match.insertMany(getMatches(category_ids, athlete));
+    const match_ids = getIds(match);
+    console.log('created Match:', match_ids.length);
   } catch (e) {
     console.log(e.message);
   }
