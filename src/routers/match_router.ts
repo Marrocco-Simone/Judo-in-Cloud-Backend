@@ -26,7 +26,7 @@ match_router.get('/:match_id', async (req, res) => {
     const match_data = {
       ...match.toObject(),
       params: age_class.params,
-      category_name: `${age_class.name} U${category.max_weight}`,
+      category_name: `${age_class.name} U${category.max_weight} ${category.gender}`,
     };
     success(res, match_data);
   } catch (e) {
