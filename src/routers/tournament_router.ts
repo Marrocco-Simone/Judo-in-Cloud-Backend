@@ -13,3 +13,16 @@ tournament_router.get('/', async (req, res) => {
     error(res, err.message, 500);
   }
 });
+
+// Get tournament by id
+tournament_router.get('/:tournament_id', async (req, res) => {
+  try {
+    const tournament_id = req.params.tournament_id;
+    const tournament = await Tournament.findById(tournament_id);
+    if (!tournament) throw new Error('No tournament found');
+
+    success(res, tournament);
+  } catch (err) {
+    error(res, err.message, 500);
+  }
+});
