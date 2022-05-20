@@ -5,25 +5,38 @@ import bcrypt = require('bcrypt');
 import { User } from '../schemas/User';
 
 export const login: RequestHandler = async function(req, res) {
-  // authenticate the user
-  const user = await User.findOne({ username: req.body.username });
-
-  if (user === null) {
-    return fail(res, 'User not found', 404);
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return fail(res, 'Inserisci username e password');
   }
+  const invalid_data_msg = 'Nome utente o password non validi';
 
   try {
-    const pw_check = await bcrypt.compare(req.body.password, user.password);
-    if (!pw_check) {
-      return fail(res, 'Incorrect password');
+    // authenticate the user
+    const user = await User.findOne({ username });
+    if (user === null) {
+      return fail(res, invalid_data_msg);
     }
-  } catch (err) {
-    return error(res, 'Error during authentication');
-  }
+    const pw_check = await bcrypt.compare(password, user.password);
+    if (!pw_check) {
+      return fail(res, invalid_data_msg);
+    }
 
-  // return the jwt
-  const jwt_payload = { _id: user._id, username: user.username };
-  // token that expires in 24 hours
-  const access_token = jwt.sign(jwt_payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
-  return success(res, { access_token });
+    // return the jwt
+    const jwt_payload = { _id: user._id, username: user.username };
+    // token that expires in 24 hours
+    const access_token = jwt.sign(jwt_payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+    return success(res, { access_token, user });
+  } catch (err) {
+    // mongoose or bcrypt error
+    return error(res, 'Errore interno durante il login');
+  }
+};
+
+export const me: RequestHandler = async function(req, res) {
+  if (!req.user) {
+    console.error('[AUTH CONTROLLER] auth/me does not have user in the request');
+    return error(res, 'Errore interno');
+  }
+  return success(res, req.user);
 };
