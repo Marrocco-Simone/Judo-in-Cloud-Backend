@@ -1,37 +1,44 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
-interface TournamentInterface {
-  competition: string;
-  category: string;
+export interface TournamentInterface {
+  _id: Types.ObjectId;
+  competition: Types.ObjectId;
+  category: Types.ObjectId;
   tatami_number: number;
   finished: boolean;
-  athletes: string[];
-  winners_bracket: string[];
-  recovered_bracket_1: string[];
-  recovered_bracket_2: string[];
+  athletes: Types.ObjectId[];
+  winners_bracket: Types.ObjectId[][];
+  recovered_bracket_1: Types.ObjectId[][];
+  recovered_bracket_2: Types.ObjectId[][];
 }
 
 const tournament_schema = new Schema<TournamentInterface>({
-  competition: String,
-  category: String,
+  competition: {
+    type: SchemaTypes.ObjectId,
+    ref: 'Competition'
+  },
+  category: {
+    type: SchemaTypes.ObjectId,
+    ref: 'Category'
+  },
   tatami_number: Number,
   finished: Boolean,
   athletes: [{
     type: SchemaTypes.ObjectId,
     ref: 'Athlete'
   }],
-  winners_bracket: [{
+  winners_bracket: [[{
     type: SchemaTypes.ObjectId,
     ref: 'Match'
-  }],
-  recovered_bracket_1: [{
+  }]],
+  recovered_bracket_1: [[{
     type: SchemaTypes.ObjectId,
     ref: 'Match'
-  }],
-  recovered_bracket_2: [{
+  }]],
+  recovered_bracket_2: [[{
     type: SchemaTypes.ObjectId,
     ref: 'Match'
-  }],
+  }]],
 });
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
