@@ -108,13 +108,11 @@ async function closeAgeClass(
     tournament.winners_bracket = await Promise.all(
       main_bracket.map(async (round_data) => {
         return await Promise.all(
-          round_data.map(async (match_data) => {
-            if (match_data === null) {
+          round_data.map(async (match) => {
+            if (match === null) {
               return null;
             }
-            const match = new Match(match_data);
             await match.save();
-            match_data._id = match._id;
             return match._id;
           })
         );
