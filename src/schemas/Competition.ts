@@ -1,7 +1,7 @@
 import { model, Schema, Types } from 'mongoose';
 
 export interface CompetitionInterface {
-  _id: Types.ObjectId;
+  _id?: Types.ObjectId;
   name: string;
 }
 

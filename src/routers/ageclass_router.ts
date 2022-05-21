@@ -50,7 +50,7 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
 
     if (!age_class.closed && body.closed) {
       // this is a newly closed class
-      await closeAgeClass(competition, age_class);
+      await closeAgeClass(competition as CompetitionInterface, age_class);
     }
 
     age_class.closed = body.closed;
