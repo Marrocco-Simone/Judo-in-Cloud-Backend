@@ -4,6 +4,7 @@ import { success, error, fail } from '../controllers/base_controller';
 import { Athlete, Category, Match, Tournament } from '../schemas';
 import { generateMainBracket } from '../helpers/bracket_utils';
 import { CompetitionInterface } from '../schemas/Competition';
+import { CategoryInterface } from '../schemas/Category';
 /** api for matches */
 export const ageclass_router = express.Router();
 
@@ -11,13 +12,16 @@ ageclass_router.get('/', async (req, res) => {
   try {
     const age_classes = await AgeClass.find();
     const categories = await Category.find();
-    for (const age_class of age_classes) {
+    const age_classes_result: (typeof age_classes[0] & {
+    categories?: CategoryInterface[]
+  })[] = age_classes;
+    for (const age_class of age_classes_result) {
       age_class.categories = [];
       for (const cat of categories) {
         if (cat.age_class === age_class._id) age_class.categories.push(cat);
       }
     }
-    success(res, age_classes);
+    success(res, age_classes_result);
   } catch (e) {
     console.log(e);
     error(res, e.message);
