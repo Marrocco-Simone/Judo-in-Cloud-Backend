@@ -10,6 +10,13 @@ export const ageclass_router = express.Router();
 ageclass_router.get('/', async (req, res) => {
   try {
     const age_classes = await AgeClass.find();
+    const categories = await Category.find();
+    for (const age_class of age_classes) {
+      age_class.categories = [];
+      for (const cat of categories) {
+        if (cat.age_class === age_class._id) age_class.categories.push(cat);
+      }
+    }
     success(res, age_classes);
   } catch (e) {
     console.log(e);
@@ -65,7 +72,10 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
   }
 });
 
-async function closeAgeClass(competition: CompetitionInterface, age_class: AgeClassInterface) {
+async function closeAgeClass(
+  competition: CompetitionInterface,
+  age_class: AgeClassInterface
+) {
   const categories = await Category.find({ age_class: age_class._id });
 
   for (const category of categories) {
@@ -81,27 +91,31 @@ async function closeAgeClass(competition: CompetitionInterface, age_class: AgeCl
       category: category._id,
       tatami_number: 0,
       finished: false,
-      athletes: category_athletes.map(x => x._id),
+      athletes: category_athletes.map((x) => x._id),
       winners_bracket: [],
       recovered_bracket_1: [],
-      recovered_bracket_2: []
+      recovered_bracket_2: [],
     });
     await tournament.save();
 
     const main_bracket = generateMainBracket(tournament, category_athletes);
 
     // save all the existing matches
-    tournament.winners_bracket = await Promise.all(main_bracket.map(async round_data => {
-      return await Promise.all(round_data.map(async match_data => {
-        if (match_data === null) {
-          return null;
-        }
-        const match = new Match(match_data);
-        await match.save();
-        match_data._id = match._id;
-        return match._id;
-      }));
-    }));
+    tournament.winners_bracket = await Promise.all(
+      main_bracket.map(async (round_data) => {
+        return await Promise.all(
+          round_data.map(async (match_data) => {
+            if (match_data === null) {
+              return null;
+            }
+            const match = new Match(match_data);
+            await match.save();
+            match_data._id = match._id;
+            return match._id;
+          })
+        );
+      })
+    );
 
     // save the tournament again, this time with the winners bracket
     await tournament.save();
