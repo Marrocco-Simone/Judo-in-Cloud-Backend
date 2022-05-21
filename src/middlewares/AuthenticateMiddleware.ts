@@ -1,6 +1,7 @@
 import express = require('express');
 import jwt = require('jsonwebtoken');
-import { unauthorized } from '../controllers/base_controller';
+import { error, unauthorized } from '../controllers/base_controller';
+import { User } from '../schemas/User';
 
 export const authenticate_token: express.RequestHandler = (req, res, next) => {
   const auth_header = req.headers.authorization;
@@ -8,12 +9,21 @@ export const authenticate_token: express.RequestHandler = (req, res, next) => {
     return unauthorized(res);
   }
   const token = auth_header.split(' ')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
     if (err) {
       return unauthorized(res);
     }
-    // here the user can be loaded from the db to make it available in every controller
-    req.user = user;
+    const user_id = (user as jwt.JwtPayload)._id;
+    try {
+      const user = await User.findById(user_id);
+      if (user === null) {
+        return unauthorized(res);
+      }
+      await user.populate('competition');
+      req.user = user;
+    } catch (err) {
+      return error(res, 'Errore durante l\'autenticazione');
+    }
     next();
   });
 };

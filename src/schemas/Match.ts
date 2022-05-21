@@ -1,5 +1,6 @@
 import { model, Schema, SchemaTypes, Types } from 'mongoose';
 export interface MatchInterface {
+  _id?: Types.ObjectId;
   white_athlete: Types.ObjectId;
   red_athlete: Types.ObjectId;
   winner_athlete: Types.ObjectId;
