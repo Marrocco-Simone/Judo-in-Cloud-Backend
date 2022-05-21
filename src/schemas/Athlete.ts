@@ -1,20 +1,21 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
-interface AthleteInterface {
+export interface AthleteInterface {
+  _id?: Types.ObjectId;
   name: string;
   surname: string;
-  competition_id: string;
+  competition: Types.ObjectId;
   club: string;
   gender: 'M'|'F';
   weight: number;
   birth_year: number;
-  category_id: string;
+  category: Types.ObjectId;
 }
 
 const athlete_schema = new Schema<AthleteInterface>({
   name: String,
   surname: String,
-  competition_id: {
+  competition: {
     type: SchemaTypes.ObjectId,
     ref: 'Competition',
   },
@@ -22,7 +23,7 @@ const athlete_schema = new Schema<AthleteInterface>({
   gender: String,
   weight: Number,
   birth_year: Number,
-  category_id: {
+  category: {
     type: SchemaTypes.ObjectId,
     ref: 'Category',
   },

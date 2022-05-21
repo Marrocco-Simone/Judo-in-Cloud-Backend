@@ -1,15 +1,16 @@
-import { model, Schema, SchemaTypes } from 'mongoose';
+import { model, Schema, SchemaTypes, Types } from 'mongoose';
+import { CompetitionInterface } from './Competition';
 
 export interface UserInterface {
   username: string;
   password: string;
-  competition_id: string;
+  competition: CompetitionInterface | Types.ObjectId;
 }
 
 const user_schema = new Schema<UserInterface>({
   username: String,
   password: String,
-  competition_id: {
+  competition: {
     type: SchemaTypes.ObjectId,
     ref: 'Competition'
   },

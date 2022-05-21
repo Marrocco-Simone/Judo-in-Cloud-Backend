@@ -1,58 +1,109 @@
 import express = require('express');
-import { AgeClass } from '../schemas/AgeClass';
-import { SchemaTypes } from 'mongoose';
-import { error, success } from '../controllers/base_controller';
-/** api for tournaments */
+import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
+import { success, error, fail } from '../controllers/base_controller';
+import { Athlete, Category, Match, Tournament } from '../schemas';
+import { generateMainBracket } from '../helpers/bracket_utils';
+import { CompetitionInterface } from '../schemas/Competition';
+/** api for matches */
 export const ageclass_router = express.Router();
 
-// Getting all
-ageclass_router.get('/params', async (req, res) => {
+ageclass_router.get('/', async (req, res) => {
   try {
-    const age_class = await AgeClass.find();
-    res.json(age_class);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const age_classes = await AgeClass.find();
+    success(res, age_classes);
+  } catch (e) {
+    console.log(e);
+    error(res, e.message);
   }
 });
 
-// Update One
-ageclass_router.post('/params', async (req, res) => {
-  const age_class = new AgeClass({
-    _id: SchemaTypes.ObjectId,
-    max_age: Number,
-    competition_id: {
-      type: SchemaTypes.ObjectId,
-      ref: 'Competition'
-    },
-    name: String,
-    closed: Boolean,
-    params: AgeClass,
-  });
+ageclass_router.get('/:age_class_id', async (req, res) => {
   try {
-    const ageClassBodyParameters = new AgeClass({
-      max_age: req.body.max_age,
-      competition_id: req.body.competition_id,
-      name: req.body.name,
-      closed: req.body.closed,
-      params: req.body.params
-    });
-
-    const updatedAge_class = ageClassBodyParameters.toObject();
-
-    AgeClass.updateOne({ _id: age_class._id }, updatedAge_class, { upsert: true }, (err) => {
-      res.status(500).json(err.message);
-    });
-    res.status(201).json(updatedAge_class);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age class not found', 404);
+    success(res, age_class);
+  } catch (e) {
+    console.log(e);
+    error(res, e.message);
   }
 });
 
-ageclass_router.get('/params/:ageclass', async (req, res) => {
-  AgeClass.findOne({ _id: 'ageclass' }, 'params', function (err, ageClassParameters) {
-    if (err) error(res, err.message, 500);
-    // Prints "Space Ghost is a talk show host".
-    success(res, ageClassParameters, 200);
-  });
+ageclass_router.post('/:age_class_id', async (req, res) => {
+  const user = req.user;
+  const competition = user.competition;
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age class not found', 404);
+    const body: {
+      closed: boolean;
+      params: {
+        match_time: number;
+        supplemental_match_time: number;
+        ippon_to_win: number;
+        wazaari_to_win: number;
+        ippon_timer: number;
+        wazaari_timer: number;
+      };
+    } = req.body;
+
+    if (!age_class.closed && body.closed) {
+      // this is a newly closed class
+      await closeAgeClass(competition as CompetitionInterface, age_class);
+    }
+
+    age_class.closed = body.closed;
+    age_class.params = body.params;
+
+    await age_class.save();
+
+    success(res, age_class);
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
 });
 
+async function closeAgeClass(competition: CompetitionInterface, age_class: AgeClassInterface) {
+  const categories = await Category.find({ age_class: age_class._id });
+
+  for (const category of categories) {
+    const category_athletes = await Athlete.find({ category });
+    if (category_athletes.length === 0) {
+      // no tournament necessary...
+      continue;
+    }
+
+    // create a new tournament for the category
+    const tournament = new Tournament({
+      competition: competition._id,
+      category: category._id,
+      tatami_number: 0,
+      finished: false,
+      athletes: category_athletes.map(x => x._id),
+      winners_bracket: [],
+      recovered_bracket_1: [],
+      recovered_bracket_2: []
+    });
+    await tournament.save();
+
+    const main_bracket = generateMainBracket(tournament, category_athletes);
+
+    // save all the existing matches
+    tournament.winners_bracket = await Promise.all(main_bracket.map(async round_data => {
+      return await Promise.all(round_data.map(async match_data => {
+        if (match_data === null) {
+          return null;
+        }
+        const match = new Match(match_data);
+        await match.save();
+        match_data._id = match._id;
+        return match._id;
+      }));
+    }));
+
+    // save the tournament again, this time with the winners bracket
+    await tournament.save();
+  }
+}
