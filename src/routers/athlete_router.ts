@@ -1,6 +1,8 @@
 // export {}; //needed or typescripts gives some strange errors
+import { Category } from '../schemas/Category';
 import { error, success } from '../controllers/base_controller';
 import { Athlete } from '../schemas/Athlete';
+import { Types } from 'mongoose';
 const express = require('express');
 
 // /** apis for athletes */
@@ -31,8 +33,11 @@ athlete_router.post('/', async (req, res) => {
     club: string,
     gender: 'M'|'F',
     weight: number,
-    birth_year: number
+    birth_year: number,
+    category: Types.ObjectId;
   } = req.body;
+
+  const athlete_category = computeCategory(req);
 
   const athlete = new Athlete({
     name: body.name,
@@ -41,7 +46,8 @@ athlete_router.post('/', async (req, res) => {
     competition: body.competition,
     gender: body.gender,
     weight: body.weight,
-    birth_year: body.birth_year
+    birth_year: body.birth_year,
+    category: athlete_category
   });
   try {
     const new_athlete = await athlete.save();
@@ -50,3 +56,11 @@ athlete_router.post('/', async (req, res) => {
     error(res, err.message, 400);
   }
 });
+function computeCategory(req) {
+  const d = new Date();
+  const current_year:number = d.getFullYear();
+
+  return Category.findOne({ gender: req.body.gender, age: { $gt: (current_year-req.body.birth_year) }});
+}
+
+  
