@@ -88,7 +88,7 @@ async function propagateLoserRecovered (bracket: BracketT, round_idx: number, id
     match.loser_recovered = true;
     await match.save();
     const players = [match.white_athlete, match.red_athlete];
-    const winner_idx = players.findIndex(player => player === match.winner_athlete);
+    const winner_idx = players.findIndex(player => player && player.equals(match.winner_athlete));
     if (winner_idx === -1) {
       throw Error('winner_idx not found while propagating recovered');
     }
