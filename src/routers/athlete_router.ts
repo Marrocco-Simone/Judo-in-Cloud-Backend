@@ -64,7 +64,9 @@ async function computeCategory(birth_year: number, weight: number, gender: 'M'|'
   const category = await Category.find({ gender, max_weight: { $gt: weight } }).populate('age_class');
   let best_category = category[0];
   for (const cat of category) {
+    // @ts-ignore
     if (cat.age_class.max_age < athlete_age) continue;
+    // @ts-ignore
     if (cat.age_class.max_age > best_category.age_class.max_age) continue;
     if (cat.max_weight < weight) continue;
     if (cat.max_weight > best_category.max_weight) continue;
@@ -72,4 +74,3 @@ async function computeCategory(birth_year: number, weight: number, gender: 'M'|'
   }
   return best_category._id;
 }
-
