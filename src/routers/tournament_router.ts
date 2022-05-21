@@ -35,6 +35,16 @@ tournament_router.get('/:tournament_id', async (req, res) => {
       .populate({
         path: 'winners_bracket',
         model: 'Match',
+        populate: [{
+          path: 'red_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'white_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'winner_athlete',
+          model: 'Athlete'
+        }]
       });
     if (!tournament) throw new Error('No tournament found');
 
@@ -99,6 +109,7 @@ async function getNextMatches({ bracket }) {
     if (!round) continue;
     for (const match_id of round) {
       if (!match_id) continue;
+      // TODO: load all matches upfront to avoid N + 1 problem
       const match = await Match.findById(match_id);
       if (!match) {
         throw new Error(
