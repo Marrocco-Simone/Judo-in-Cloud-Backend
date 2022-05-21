@@ -144,6 +144,8 @@ export async function calculateVictory (bracket: BracketT, round_idx: number, id
       next_match.red_athlete = match.winner_athlete;
     }
 
+    await next_match.save();
+
     bracket[round_idx + 1][next_match_idx] = next_match;
   }
 
