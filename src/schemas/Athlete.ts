@@ -1,6 +1,7 @@
 import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
 export interface AthleteInterface {
+  _id?: Types.ObjectId;
   name: string;
   surname: string;
   competition: Types.ObjectId;

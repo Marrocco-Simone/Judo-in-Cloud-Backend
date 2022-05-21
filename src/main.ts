@@ -4,13 +4,14 @@ import { ageclass_router } from './routers/ageclass_router';
 import { tournament_router } from './routers/tournament_router';
 import { match_router } from './routers/match_router';
 import { auth_router } from './routers/auth_router';
-import jwt = require('jsonwebtoken');
 
 import express = require('express');
 import cors = require('cors');
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
+import { UserInterface } from './schemas/User';
+require('./schemas/index.ts');
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
@@ -29,7 +30,7 @@ mongoose.connect(process.env.MONGO_URL);
 declare global {
   namespace Express {
     interface Request {
-      user: jwt.JwtPayload | string;
+      user: UserInterface;
     }
   }
 }
@@ -49,7 +50,7 @@ app.use(express.json());
 app.use('/api/v1/athletes', [authenticate_token, athlete_router]);
 app.use('/api/v1/age_classes', [authenticate_token, ageclass_router]);
 app.use('/api/v1/tournaments', [authenticate_token, tournament_router]);
-app.use('/api/v1/match', [/* authenticate_token, */match_router]);
+app.use('/api/v1/match', [authenticate_token, match_router]);
 app.use('/api/v1/auth', auth_router);
 
 // not found page
