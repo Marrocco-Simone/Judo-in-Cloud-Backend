@@ -6,9 +6,9 @@ export interface TournamentInterface {
   tatami_number: number;
   finished: boolean;
   athletes: Types.ObjectId[];
-  winners_bracket: Types.ObjectId[];
-  recovered_bracket_1: Types.ObjectId[];
-  recovered_bracket_2: Types.ObjectId[];
+  winners_bracket: Types.ObjectId[][];
+  recovered_bracket_1: Types.ObjectId[][];
+  recovered_bracket_2: Types.ObjectId[][];
 }
 
 const tournament_schema = new Schema<TournamentInterface>({
