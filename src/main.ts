@@ -11,7 +11,6 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
 import { UserInterface } from './schemas/User';
-require('./schemas/index.ts');
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
