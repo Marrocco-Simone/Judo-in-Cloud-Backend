@@ -64,8 +64,8 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
       await closeAgeClass(competition as CompetitionInterface, age_class);
     }
 
-    if (body.closed) age_class.closed = body.closed;
-    if (body.params) age_class.params = body.params;
+    if (body.closed != null) age_class.closed = body.closed;
+    if (body.params != null) age_class.params = body.params;
 
     await age_class.save();
 
