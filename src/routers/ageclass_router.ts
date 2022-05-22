@@ -12,13 +12,18 @@ ageclass_router.get('/', async (req, res) => {
   try {
     const age_classes = await AgeClass.find();
     const categories = await Category.find();
-    const age_classes_result: (typeof age_classes[0] & {
-    categories?: CategoryInterface[]
-  })[] = age_classes;
+    const age_classes_result: (AgeClassInterface & {
+      categories?: CategoryInterface[];
+    })[] = [];
+    for (const age_class of age_classes) {
+      age_classes_result.push(age_class.toObject());
+    }
     for (const age_class of age_classes_result) {
       age_class.categories = [];
       for (const cat of categories) {
-        if (cat.age_class === age_class._id) age_class.categories.push(cat);
+        if (cat.age_class.equals(age_class._id)) {
+          age_class.categories.push(cat.toObject());
+        }
       }
     }
     success(res, age_classes_result);
