@@ -48,7 +48,7 @@ athlete_router.post('/', async (req, res) => {
     gender: body.gender,
     weight: body.weight,
     birth_year: body.birth_year,
-    category: computeCategory(body.birth_year, body.weight, body.gender)
+    category: await computeCategory(body.birth_year, body.weight, body.gender)
   });
   try {
     const new_athlete = await athlete.save();
