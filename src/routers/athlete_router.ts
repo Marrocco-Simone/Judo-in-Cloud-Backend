@@ -32,6 +32,7 @@ athlete_router.post('/', async (req, res) => {
   if (
     !body.name ||
     !body.surname ||
+    !body.competition ||
     !body.club ||
     !body.gender ||
     !body.weight ||
