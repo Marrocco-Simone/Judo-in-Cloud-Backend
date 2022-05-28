@@ -5,8 +5,8 @@ import { tournament_router } from './routers/tournament_router';
 import { match_router } from './routers/match_router';
 import { auth_router } from './routers/auth_router';
 
-import express = require('express');
-import cors = require('cors');
+import express from 'express';
+import cors from 'cors';
 import 'dotenv/config';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
 import { UserInterface } from './schemas/User';

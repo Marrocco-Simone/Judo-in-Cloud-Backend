@@ -1,4 +1,4 @@
-import express = require('express');
+import express from 'express';
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Athlete, Category, Match, Tournament } from '../schemas';
