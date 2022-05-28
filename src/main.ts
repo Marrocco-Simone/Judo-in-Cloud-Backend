@@ -11,6 +11,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
 import { UserInterface } from './schemas/User';
+import { api_v2_router } from './routers/api_v2';
 
 const app = express();
 const server_port = process.env.SERVER_PORT;
@@ -51,6 +52,7 @@ app.use('/api/v1/age_classes', [authenticate_token, ageclass_router]);
 app.use('/api/v1/tournaments', [authenticate_token, tournament_router]);
 app.use('/api/v1/match', [authenticate_token, match_router]);
 app.use('/api/v1/auth', auth_router);
+app.use('/api/v2/', api_v2_router);
 
 // not found page
 app.get('*', async (req, res) => {
