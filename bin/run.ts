@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { app } from '../src/main';
+import { app } from '../src/bootstrap';
 
 const server_port = process.env.SERVER_PORT;
 const server_url = process.env.SERVER_URL;
