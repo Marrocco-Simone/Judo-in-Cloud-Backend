@@ -351,7 +351,7 @@ function getAthetes(
 }
 
 async function main() {
-  const mongo_url = process.env.MONGO_URL;
+  const mongo_url = process.env.ENV === 'test' ? process.env.MONGO_URL_TEST : process.env.MONGO_URL;
   try {
     mongoose.connect(mongo_url);
     const competition = await Competition.insertMany(getCompetitions());
