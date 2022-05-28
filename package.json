@@ -5,8 +5,8 @@
   "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node bin/bootstrap.ts",
-    "start-dev": "tsnd --respawn bin/bootstrap.ts",
+    "start": "ts-node bin/run.ts",
+    "start-dev": "tsnd --respawn bin/run.ts",
     "setup": "ts-node src/setup.ts",
     "seed": "ts-node src/db_seeder.ts",
     "lint": "eslint --fix --ext .ts,.js .",
