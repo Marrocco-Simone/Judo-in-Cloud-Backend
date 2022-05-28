@@ -130,3 +130,13 @@ async function closeAgeClass(
     await tournament.save();
   }
 }
+
+/* GIRARDI: API V2 */
+ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
+  res.json({ hello: 'world' });
+});
+
+/* GIRARDI: API V2 */
+ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
+  res.json({ hello: 'world' });
+});
