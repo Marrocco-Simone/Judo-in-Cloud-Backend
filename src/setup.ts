@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { User } from './schemas/User';
-import bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 import 'dotenv/config';
 
 const mongo_url = process.env.MONGO_URL;
