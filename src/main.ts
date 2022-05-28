@@ -8,22 +8,10 @@ import { auth_router } from './routers/auth_router';
 import express = require('express');
 import cors = require('cors');
 import 'dotenv/config';
-import mongoose from 'mongoose';
 import { authenticate_token } from './middlewares/AuthenticateMiddleware';
 import { UserInterface } from './schemas/User';
 
-const app = express();
-const server_port = process.env.SERVER_PORT;
-const server_url = process.env.SERVER_URL;
-const mongo_url = process.env.ENV === 'test' ? process.env.MONGO_URL_TEST : process.env.MONGO_URL;
-const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
-
-if ([server_port, server_url, mongo_url, access_token_secret].includes(undefined)) {
-  throw new Error('Application not correctly configured, please copy .env.example to .env ' +
-    'and update it with your configuration, then restart.');
-}
-
-mongoose.connect(mongo_url);
+export const app = express();
 
 // handle type from middlewares
 declare global {
@@ -59,6 +47,3 @@ app.get('*', async (req, res) => {
     error: 'page not found'
   });
 });
-
-// start server
-app.listen(server_port, () => console.log(`Listening on ${server_url}:${server_port}`));
