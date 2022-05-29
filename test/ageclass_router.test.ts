@@ -82,6 +82,10 @@ const categories: CategoryInterface[] = [
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
 
+  server = app.listen(2500);
+});
+
+beforeEach(async () => {
   await Competition.remove({});
 
   const competition = new Competition({
@@ -109,8 +113,6 @@ beforeAll(async () => {
 
   await Category.remove({});
   await Category.insertMany(categories);
-
-  server = app.listen(2500);
 });
 
 afterAll(async () => {
@@ -225,6 +227,27 @@ test(`GET ${age_class_route}/:age_class_id should give back unauthorized error i
   });
 });
 
+test(`GET ${age_class_route}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = new mongoose.Types.ObjectId();
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_3.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Age class not found',
+    status: 'fail'
+  });
+});
+
 test(`GET ${age_class_route}/:age_class_id should give back the specific age class with a valid jwt`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
@@ -253,6 +276,122 @@ test(`GET ${age_class_route}/:age_class_id should give back the specific age cla
         wazaari_to_win: 3,
         ippon_timer: 10,
         wazaari_timer: 5
+      }
+    },
+    status: 'success'
+  });
+});
+
+test(`POST ${age_class_route}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+    method: 'POST'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Unauthorized',
+    status: 'fail'
+  });
+});
+
+test(`POST ${age_class_route}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = new mongoose.Types.ObjectId();
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_3.toString()}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Age class not found',
+    status: 'fail'
+  });
+});
+
+test(`POST ${age_class_route}/:age_class_id should give back an error if the parameters in the body are not of a valid type`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    params: {
+      match_time: '10 minutes',
+      supplemental_match_time: '2 minutes',
+      ippon_to_win: '1 ippon',
+      wazaari_to_win: '4 wazaaris',
+      ippon_timer: '10 seconds',
+      wazaari_timer: '6 seconds'
+    }
+  };
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'AgeClass validation failed: params.match_time: Cast to Number failed for value "10 minutes" (type string) at path "params.match_time", params.supplemental_match_time: Cast to Number failed for value "2 minutes" (type string) at path "params.supplemental_match_time", params.ippon_to_win: Cast to Number failed for value "1 ippon" (type string) at path "params.ippon_to_win", params.wazaari_to_win: Cast to Number failed for value "4 wazaaris" (type string) at path "params.wazaari_to_win", params.ippon_timer: Cast to Number failed for value "10 seconds" (type string) at path "params.ippon_timer", params.wazaari_timer: Cast to Number failed for value "6 seconds" (type string) at path "params.wazaari_timer"',
+    status: 'error'
+  });
+});
+
+test(`POST ${age_class_route}/:age_class_id should update the age class with the parameters in the body, if they are of valid type`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    params: {
+      match_time: 10,
+      supplemental_match_time: 2,
+      ippon_to_win: 1,
+      wazaari_to_win: 4,
+      ippon_timer: 10,
+      wazaari_timer: 6
+    }
+  };
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: age_class_id_1.toString(),
+      closed: false,
+      competition: competition_id.toString(),
+      max_age: 15,
+      name: 'Giovanissimi',
+      params: {
+        match_time: 10,
+        supplemental_match_time: 2,
+        ippon_to_win: 1,
+        wazaari_to_win: 4,
+        ippon_timer: 10,
+        wazaari_timer: 6
       }
     },
     status: 'success'
