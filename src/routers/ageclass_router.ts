@@ -173,7 +173,7 @@ ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
     if (!age_class) return fail(res, 'Age Class not found');
-    if (!age_class.closed) return success(res, {});
+    if (!age_class.closed) return success(res, age_class);
 
     const category = await Category.find({ age_class: age_class_id });
     const category_ids = category.map((cat) => cat._id);
@@ -189,7 +189,7 @@ ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
     age_class.closed = false;
     await age_class.save();
 
-    return success(res, {});
+    return success(res, age_class);
   } catch (err) {
     console.error({ err });
     error(res, err.message);
