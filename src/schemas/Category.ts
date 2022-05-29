@@ -1,6 +1,7 @@
 import { model, Schema, SchemaTypes, Types } from 'mongoose';
 
 export interface CategoryInterface {
+  _id?: Types.ObjectId;
   age_class: Types.ObjectId;
   max_weight: number;
   gender: 'M'|'F';
