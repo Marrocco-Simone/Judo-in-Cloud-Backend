@@ -103,6 +103,28 @@ test(`POST ${auth_route} should give an error message if there is no username or
   });
 });
 
+test(`POST ${auth_route} should give an error message if there is no user matching the username inside the body`, async () => {
+  const req_body = {
+    username: 'invalidUser',
+    password: 'pwd'
+  };
+
+  const res = await node_fetch(auth_route, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Nome utente o password non validi',
+    status: 'fail'
+  });
+});
+
 test(`POST ${auth_route} should give an error message if the password inside the body is wrong`, async () => {
   const req_body = {
     username: 'validUser',
