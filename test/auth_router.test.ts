@@ -15,6 +15,10 @@ const competition_id = new mongoose.Types.ObjectId();
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
 
+  server = app.listen(2500);
+});
+
+beforeEach(async () => {
   await Competition.remove({});
 
   const competition = new Competition({
@@ -36,8 +40,6 @@ beforeAll(async () => {
   });
 
   await user_to_save.save();
-
-  server = app.listen(2500);
 });
 
 afterAll(async () => {
