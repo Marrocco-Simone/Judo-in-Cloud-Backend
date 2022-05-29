@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../src/schemas';
+import { Competition, User } from '../src/schemas';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -9,19 +9,30 @@ const node_fetch = require('node-fetch');
 let server;
 const auth_route = 'http://localhost:2500/api/v1/auth';
 
-const user_id = new mongoose.Types.ObjectId();
+const user_id_1 = new mongoose.Types.ObjectId();
+const competition_id = new mongoose.Types.ObjectId();
 
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
+
+  await Competition.remove({});
+
+  const competition = new Competition({
+    _id: competition_id,
+    name: 'competition'
+  });
+
+  await competition.save();
 
   await User.remove({});
 
   const hash = await bcrypt.hash('pwd', 10);
 
   const user_to_save = new User({
-    _id: user_id,
+    _id: user_id_1,
     username: 'validUser',
-    password: hash
+    password: hash,
+    competition: competition_id
   });
 
   await user_to_save.save();
@@ -67,8 +78,8 @@ test(`GET ${auth_route} should give back unauthorized error if the jwt is linked
   });
 });
 
-test(`GET ${auth_route} should give back the user associated to the jwt if valid`, async () => {
-  const valid_user = { _id: user_id, username: 'validUser' };
+test(`GET ${auth_route} should give back the user associated to the jwt if valid and populate the competition property`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
 
@@ -80,11 +91,18 @@ test(`GET ${auth_route} should give back the user associated to the jwt if valid
 
   const json_res = await res.json();
 
-  expect(json_res).toMatchObject({
+  delete json_res.data.password;
+
+  expect(json_res).toEqual({
     status: 'success',
     data: {
       __v: 0,
-      _id: user_id.toString(),
+      _id: user_id_1.toString(),
+      competition: {
+        __v: 0,
+        _id: competition_id.toString(),
+        name: 'competition'
+      },
       username: 'validUser'
     }
   });
@@ -148,7 +166,7 @@ test(`POST ${auth_route} should give an error message if the password inside the
 });
 
 test(`POST ${auth_route} should correctly log in a user, given valid username and password inside the body`, async () => {
-  const valid_user = { _id: user_id, username: 'validUser' };
+  const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
 
   const req_body = {
@@ -166,12 +184,15 @@ test(`POST ${auth_route} should correctly log in a user, given valid username an
 
   const json_res = await res.json();
 
-  expect(json_res).toMatchObject({
+  delete json_res.data.user.password;
+
+  expect(json_res).toEqual({
     data: {
       access_token: access_jwt,
       user: {
         __v: 0,
-        _id: user_id,
+        _id: user_id_1.toString(),
+        competition: competition_id.toString(),
         username: 'validUser'
       }
     },
