@@ -133,7 +133,31 @@ async function closeAgeClass(
 
 /* GIRARDI: API V2 */
 ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
-  res.json({ hello: 'world' });
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class.closed) return success(res, { can_reopen: true });
+    const category = await Category.find({ age_class: age_class_id });
+    const category_ids = category.map((cat) => cat._id);
+    const tournament = await Tournament.find({
+      category: { $in: category_ids },
+    }).populate({
+      path: 'winners_bracket',
+      model: 'Match',
+    });
+    for (const tour of tournament) {
+      for (const bracket of tour.winners_bracket) {
+        for (const match of bracket) {
+          // @ts-ignore
+          if (match?.is_started) return success(res, { can_reopen: false });
+        }
+      }
+    }
+    return success(res, { can_reopen: true });
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
 });
 
 /* GIRARDI: API V2 */
