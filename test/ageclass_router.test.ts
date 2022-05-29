@@ -213,3 +213,48 @@ test(`GET ${age_class_route} should give back all the age classes with a valid j
     status: 'success'
   });
 });
+
+test(`GET ${age_class_route}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Unauthorized',
+    status: 'fail'
+  });
+});
+
+test(`GET ${age_class_route}/:age_class_id should give back the specific age class with a valid jwt`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: age_class_id_1.toString(),
+      closed: false,
+      competition: competition_id.toString(),
+      max_age: 15,
+      name: 'Giovanissimi',
+      params: {
+        match_time: 10,
+        supplemental_match_time: 2,
+        ippon_to_win: 1,
+        wazaari_to_win: 3,
+        ippon_timer: 10,
+        wazaari_timer: 5
+      }
+    },
+    status: 'success'
+  });
+});
