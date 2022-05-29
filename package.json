@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "test": "ENV=test jest --coverage",
+    "test": "ENV=test jest --runInBand --coverage",
     "start": "ts-node bin/run.ts",
     "start-dev": "tsnd --respawn bin/run.ts",
     "setup": "ts-node src/setup.ts",
