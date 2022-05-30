@@ -58,6 +58,32 @@ athlete_router.post('/', async (req, res) => {
     error(res, err.message, 400);
   }
 });
+
+// Modify an athlete
+athlete_router.patch('/:athlete_id', async (req, res) => {
+  try {
+    const id = req.params.athlete_id;
+    const update_athlete = await Athlete.findByIdAndUpdate(id, req.body, {
+      new: true
+    });
+    update_athlete.category = await computeCategory(update_athlete.birth_year, update_athlete.weight, update_athlete.gender);
+    success(res, update_athlete, 200);
+  } catch (error) {
+    fail(res, error.message, 500);
+  }
+});
+
+// Delete an athlete
+athlete_router.delete('/:athlete_id', async (req, res) => {
+  try {
+    const id = req.params.athlete_id;
+    const delete_athlete = await Athlete.findByIdAndDelete(id);
+    success(res, delete_athlete, 200);
+  } catch (error) {
+    fail(res, error.message, 500);
+  }
+});
+
 async function computeCategory(birth_year: number, weight: number, gender: 'M'|'F') {
   const d = new Date();
   const current_year:number = d.getFullYear();
