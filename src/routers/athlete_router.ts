@@ -71,10 +71,19 @@ athlete_router.patch('/:athlete_id', async (req, res) => {
         fail(res, 'Athlete not found', 404);
       }
     });
-    const update_athlete = await Athlete.findByIdAndUpdate(id, req.body, {
-      new: true
-    });
-    update_athlete.category = await computeCategory(update_athlete.birth_year, update_athlete.weight, update_athlete.gender);
+    const update_athlete = await Athlete.findByIdAndUpdate(id,
+      {
+        name: req.body.name,
+        surname: req.body.surname,
+        competition: req.body.competition,
+        club: req.body.club,
+        gender: req.body.gender,
+        weight: req.body.weight,
+        birth_year: req.body.birth_year,
+        category: await computeCategory(req.body.birth_year, req.body.weight, req.body.gender)
+      }, {
+        new: true
+      });
     const updated_athlete = await update_athlete.save();
     success(res, updated_athlete, 200);
   } catch (error) {
