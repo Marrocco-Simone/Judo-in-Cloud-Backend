@@ -23,8 +23,8 @@ athlete_router.get('/club', async (req, res) => {
   const clubs = new Set();
   try {
     const athletes = await Athlete.find();
-    for (var athlete in athletes) {
-      clubs.add(athlete["club"]);
+    for (const athlete of athletes) {
+      clubs.add(athlete.club);
     }
     success(res, clubs, 200);
   } catch (err) {
