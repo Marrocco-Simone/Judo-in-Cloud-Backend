@@ -18,23 +18,18 @@ athlete_router.get('/', async (req, res) => {
 });
 
 // Getting all clubs
+/* PORCELLI SECONDO SPRINT */
 athlete_router.get('/club', async (req, res) => {
   const clubs = new Set();
   try {
     const athletes = await Athlete.find();
-    for (var key in athletes) {
-      var selectedAthlete = athletes[key];
-      for (var prop in selectedAthlete) {
-          if(prop==="club"){
-              clubs.add(selectedAthlete[prop]);
-          }    
-      }
+    for (var athlete in athletes) {
+      clubs.add(athlete["club"]);
     }
     success(res, clubs, 200);
   } catch (err) {
     fail(res, 'Internal error', 500);
   }
-  
 });
 
 // Creating One
