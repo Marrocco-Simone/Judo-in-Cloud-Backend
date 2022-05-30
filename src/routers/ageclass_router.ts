@@ -70,7 +70,13 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
     }
 
     if (body.closed != null) age_class.closed = body.closed;
-    if (body.params != null) age_class.params = body.params;
+    if (body.params != null) {
+      const { match_time, supplemental_match_time, ippon_to_win, wazaari_to_win, ippon_timer, wazaari_timer } = body.params;
+
+      if (!match_time || !supplemental_match_time || !ippon_to_win || !wazaari_to_win || !ippon_timer || !wazaari_timer) return fail(res, 'Not enough parameters in the params');
+
+      age_class.params = body.params;
+    }
 
     await age_class.save();
 

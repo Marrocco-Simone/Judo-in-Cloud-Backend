@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { Competition, User } from '../src/schemas';
+import { AgeClass, Athlete, Category, Competition, Tournament, User } from '../src/schemas';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { AgeClassInterface, AgeClass } from '../src/schemas/AgeClass';
-import { CategoryInterface, Category } from '../src/schemas/Category';
+import { AgeClassInterface } from '../src/schemas/AgeClass';
+import { CategoryInterface } from '../src/schemas/Category';
+import { AthleteInterface } from '../src/schemas/Athlete';
 
 const { app } = require('../src/bootstrap');
 const node_fetch = require('node-fetch');
@@ -19,6 +20,8 @@ const category_id_1 = new mongoose.Types.ObjectId();
 const category_id_2 = new mongoose.Types.ObjectId();
 const category_id_3 = new mongoose.Types.ObjectId();
 const category_id_4 = new mongoose.Types.ObjectId();
+const athlete_id_1 = new mongoose.Types.ObjectId();
+const athlete_id_2 = new mongoose.Types.ObjectId();
 
 const age_classes: AgeClassInterface[] = [
   {
@@ -78,6 +81,30 @@ const categories: CategoryInterface[] = [
     gender: 'M',
   }
 ];
+const athletes: AthleteInterface[] = [
+  {
+    _id: athlete_id_1,
+    name: 'Marco',
+    surname: 'Rossi',
+    competition: competition_id,
+    club: 'Judo Bologna',
+    gender: 'M',
+    weight: 48,
+    birth_year: 2010,
+    category: category_id_2
+  },
+  {
+    _id: athlete_id_2,
+    name: 'Daniele',
+    surname: 'Bianchi',
+    competition: competition_id,
+    club: 'Judo Treviso',
+    gender: 'M',
+    weight: 47,
+    birth_year: 2011,
+    category: category_id_2
+  }
+];
 
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
@@ -113,6 +140,11 @@ beforeEach(async () => {
 
   await Category.remove({});
   await Category.insertMany(categories);
+
+  await Athlete.remove({});
+  await Athlete.insertMany(athletes);
+
+  await Tournament.remove({});
 });
 
 afterAll(async () => {
@@ -350,6 +382,37 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
   });
 });
 
+test(`POST ${age_class_route}/:age_class_id should give back an error if the parameters in the body are not enough`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    params: {
+      match_time: 10,
+      supplemental_match_time: 2,
+      ippon_to_win: 1,
+      wazaari_to_win: 4
+    }
+  };
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Not enough parameters in the params',
+    status: 'fail'
+  });
+});
+
 test(`POST ${age_class_route}/:age_class_id should update the age class with the parameters in the body, if they are of valid type`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
@@ -395,5 +458,65 @@ test(`POST ${age_class_route}/:age_class_id should update the age class with the
       }
     },
     status: 'success'
+  });
+});
+
+test(`POST ${age_class_route}/:age_class_id should close the age class with the flag in the body, create a new tournament`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    closed: true
+  };
+
+  const res = await node_fetch(`${age_class_route}/${age_class_id_2.toString()}`, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: age_class_id_2.toString(),
+      closed: true,
+      competition: competition_id.toString(),
+      max_age: 13,
+      name: 'Esordienti',
+      params: {
+        match_time: 5,
+        supplemental_match_time: 1,
+        ippon_to_win: 1,
+        wazaari_to_win: 2,
+        ippon_timer: 7,
+        wazaari_timer: 5
+      }
+    },
+    status: 'success'
+  });
+
+  expect(await Tournament.count({})).toBe(1);
+
+  // remove information that we cannot retrieve, ids generated automatically
+  const tournament = await (await Tournament.findOne({}, { _id: 0, winners_bracket: 0 })).toJSON();
+
+  expect(tournament).toEqual({
+    __v: 1,
+    athletes: [
+      athlete_id_1,
+      athlete_id_2,
+    ],
+    category: category_id_2,
+    competition: competition_id,
+    finished: false,
+    recovered_bracket_1: [],
+    recovered_bracket_2: [],
+    tatami_number: 0
   });
 });
