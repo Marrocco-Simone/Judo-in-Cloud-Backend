@@ -63,12 +63,17 @@ athlete_router.post('/', async (req, res) => {
 athlete_router.patch('/:athlete_id', async (req, res) => {
   try {
     const id = req.params.athlete_id;
+    Athlete.exists({ _id: id }, function (err, doc) {
+      if (err) {
+        fail(res, err.message, 500);
+      }
+      if (doc==null) {
+        fail(res, 'Athlete not found', 404);
+      }
+    });
     const update_athlete = await Athlete.findByIdAndUpdate(id, req.body, {
       new: true
     });
-    if (!update_athlete) {
-      fail(res, 'Athlete not found', 404);
-    }
     update_athlete.category = await computeCategory(update_athlete.birth_year, update_athlete.weight, update_athlete.gender);
     const updated_athlete = await update_athlete.save();
     success(res, updated_athlete, 200);
@@ -81,10 +86,15 @@ athlete_router.patch('/:athlete_id', async (req, res) => {
 athlete_router.delete('/:athlete_id', async (req, res) => {
   try {
     const id = req.params.athlete_id;
+    Athlete.exists({ _id: id }, function (err, doc) {
+      if (err) {
+        fail(res, err.message, 500);
+      }
+      if (doc==null) {
+        fail(res, 'Athlete not found', 404);
+      }
+    });
     const delete_athlete = await Athlete.findByIdAndDelete(id);
-    if (!delete_athlete) {
-      fail(res, 'Athlete not found', 404);
-    }
     success(res, delete_athlete, 200);
   } catch (error) {
     fail(res, error.message, 500);
