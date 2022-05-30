@@ -60,6 +60,7 @@ athlete_router.post('/', async (req, res) => {
 });
 
 // Modify an athlete
+/* PORCELLI SECONDO SPRINT */
 athlete_router.patch('/:athlete_id', async (req, res) => {
   try {
     const id = req.params.athlete_id;
@@ -92,6 +93,7 @@ athlete_router.patch('/:athlete_id', async (req, res) => {
 });
 
 // Delete an athlete
+/* PORCELLI SECONDO SPRINT */
 athlete_router.delete('/:athlete_id', async (req, res) => {
   try {
     const id = req.params.athlete_id;
