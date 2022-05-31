@@ -2,6 +2,7 @@
 import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete } from '../schemas/Athlete';
+import { Types } from 'mongoose';
 const express = require('express');
 
 /** apis for athletes */
@@ -84,34 +85,39 @@ athlete_router.post('/', async (req, res) => {
 
 // Modify an athlete
 /* PORCELLI SECONDO SPRINT */
-athlete_router.patch('/:athlete_id', async (req, res) => {
+athlete_router.put('/:athlete_id', async (req, res) => {
   try {
-    const id = req.params.athlete_id;
-    Athlete.exists({ _id: id }, function (err, doc) {
-      if (err) {
-        fail(res, err.message, 500);
-      }
-      if (doc==null) {
-        fail(res, 'Athlete not found', 404);
-      }
-    });
-    const update_athlete = await Athlete.findByIdAndUpdate(id,
-      {
-        name: req.body.name,
-        surname: req.body.surname,
-        competition: req.user.competition._id,
-        club: req.body.club,
-        gender: req.body.gender,
-        weight: req.body.weight,
-        birth_year: req.body.birth_year,
-        category: await computeCategory(req.body.birth_year, req.body.weight, req.body.gender)
-      }, {
-        new: true
-      });
-    const updated_athlete = await update_athlete.save();
-    success(res, updated_athlete, 200);
-  } catch (error) {
-    fail(res, error.message, 500);
+    const id = new Types.ObjectId(req.params.athlete_id);
+    const athlete = await Athlete.findById(id);
+    if (!athlete) return fail(res, 'Athlete not found', 404);
+
+    const body: {
+      name?: string;
+      surname?: string;
+      user?: { competition: { _id: string } };
+      club?: string;
+      gender?: 'M' | 'F';
+      weight?: number;
+      birth_year?: number;
+    } = req.body;
+
+    if (body.name) athlete.name = body.name;
+    if (body.surname) athlete.surname = body.surname;
+    if (body.club) athlete.club = body.club;
+    if (body.gender) athlete.gender = body.gender;
+    if (body.weight) athlete.weight = body.weight;
+    if (body.birth_year) athlete.birth_year = body.birth_year;
+    if (body.gender || body.weight || body.birth_year) {
+      athlete.category = await computeCategory(
+        body.birth_year,
+        body.weight,
+        body.gender
+      );
+    }
+    await athlete.save();
+    success(res, athlete, 200);
+  } catch (err) {
+    error(res, err.message, 500);
   }
 });
 
@@ -119,22 +125,18 @@ athlete_router.patch('/:athlete_id', async (req, res) => {
 /* PORCELLI SECONDO SPRINT */
 athlete_router.delete('/:athlete_id', async (req, res) => {
   try {
-    const id = req.params.athlete_id;
-    Athlete.exists({ _id: id }, function (err, doc) {
-      if (err) {
-        fail(res, err.message, 500);
-      }
-      if (doc==null) {
-        fail(res, 'Athlete not found', 404);
-      }
-    });
-    const delete_athlete = await Athlete.findByIdAndDelete(id);
-    success(res, delete_athlete, 200);
+    const id = new Types.ObjectId(req.params.athlete_id);
+    const athlete = await Athlete.findById(id);
+    if (!athlete) return fail(res, 'Athlete not found', 404);
+
+    await athlete.remove();
+    success(res, athlete, 200);
   } catch (error) {
     fail(res, error.message, 500);
   }
 });
 
+/* TODO aggiungere classe pesi massimi, tipo 100+ */
 async function computeCategory(
   birth_year: number,
   weight: number,
