@@ -93,6 +93,7 @@ test(`GET ${auth_route} should give back the user associated to the jwt if valid
 
   const json_res = await res.json();
 
+  // hashed information that we cannot retrieve or reproduce
   delete json_res.data.password;
 
   expect(json_res).toEqual({
@@ -186,6 +187,7 @@ test(`POST ${auth_route} should correctly log in a user, given valid username an
 
   const json_res = await res.json();
 
+  // hashed information that we cannot retrieve or reproduce
   delete json_res.data.user.password;
 
   expect(json_res).toEqual({
