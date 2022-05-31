@@ -1,8 +1,9 @@
 // export {}; //needed or typescripts gives some strange errors
 import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
-import { Athlete } from '../schemas/Athlete';
+import { Athlete, AthleteInterface } from '../schemas/Athlete';
 import { Types } from 'mongoose';
+import { Tournament } from '../schemas';
 const express = require('express');
 
 /** apis for athletes */
@@ -29,6 +30,41 @@ athlete_router.get('/club', async (req, res) => {
     }
     const clubs_array = Array.from(clubs);
     success(res, clubs_array, 200);
+  } catch (err) {
+    fail(res, 'Internal error', 500);
+  }
+});
+
+// Getting athetes of club + tournament_id
+/* API V2 */
+athlete_router.get('/club/:club', async (req, res) => {
+  const club = req.params.club;
+  try {
+    const athletes = await Athlete.find({ club });
+    const tournaments = await Tournament.find();
+
+    const category_to_tournament: { [category_id: string]: Types.ObjectId } =
+      {};
+    for (const tour of tournaments) {
+      category_to_tournament[`${tour.category}`] = tour._id;
+    }
+
+    const athletes_send: (AthleteInterface & { tournament: Types.ObjectId })[] =
+      athletes.map((athlete) => {
+        return {
+          name: athlete.name,
+          surname: athlete.surname,
+          club: athlete.club,
+          birth_year: athlete.birth_year,
+          weight: athlete.weight,
+          gender: athlete.gender,
+          competition: athlete.competition,
+          category: athlete.category,
+          tournament: category_to_tournament[`${athlete.category}`],
+        };
+      });
+
+    success(res, athletes_send, 200);
   } catch (err) {
     fail(res, 'Internal error', 500);
   }
