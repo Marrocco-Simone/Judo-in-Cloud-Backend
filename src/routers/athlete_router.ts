@@ -76,7 +76,7 @@ athlete_router.patch('/:athlete_id', async (req, res) => {
       {
         name: req.body.name,
         surname: req.body.surname,
-        competition: req.body.competition,
+        competition: req.user.competition._id,
         club: req.body.club,
         gender: req.body.gender,
         weight: req.body.weight,
