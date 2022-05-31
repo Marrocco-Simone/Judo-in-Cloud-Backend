@@ -12,13 +12,18 @@ ageclass_router.get('/', async (req, res) => {
   try {
     const age_classes = await AgeClass.find();
     const categories = await Category.find();
-    const age_classes_result: (typeof age_classes[0] & {
-    categories?: CategoryInterface[]
-  })[] = age_classes;
+    const age_classes_result: (AgeClassInterface & {
+      categories?: CategoryInterface[];
+    })[] = [];
+    for (const age_class of age_classes) {
+      age_classes_result.push(age_class.toObject());
+    }
     for (const age_class of age_classes_result) {
       age_class.categories = [];
       for (const cat of categories) {
-        if (cat.age_class === age_class._id) age_class.categories.push(cat);
+        if (cat.age_class.equals(age_class._id)) {
+          age_class.categories.push(cat.toObject());
+        }
       }
     }
     success(res, age_classes_result);
@@ -125,3 +130,68 @@ async function closeAgeClass(
     await tournament.save();
   }
 }
+
+/* GIRARDI: API V2 */
+/* se la classe d'eta' e' aperta, allora ritorniamo che e' possibile riaprirla */
+ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class.closed) return success(res, { can_reopen: true });
+
+    const category = await Category.find({ age_class: age_class_id });
+    const category_ids = category.map((cat) => cat._id);
+
+    const tournament = await Tournament.find({
+      category: { $in: category_ids },
+    }).populate({
+      path: 'winners_bracket',
+      model: 'Match',
+    });
+
+    for (const tour of tournament) {
+      for (const bracket of tour.winners_bracket) {
+        for (const match of bracket) {
+          // @ts-ignore
+          if (match?.is_started) return success(res, { can_reopen: false });
+        }
+      }
+    }
+
+    return success(res, { can_reopen: true });
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
+});
+
+/* GIRARDI: API V2 */
+/* se la classe d'eta' e' gia' aperta, ritorniamo esito positivo */
+ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class.closed) return success(res, age_class);
+
+    const category = await Category.find({ age_class: age_class_id });
+    const category_ids = category.map((cat) => cat._id);
+
+    const tournament = await Tournament.find({
+      category: { $in: category_ids },
+    });
+    const tournament_ids = tournament.map((tour) => tour._id);
+
+    await Match.deleteMany({ tournament: { $in: tournament_ids } });
+    await Tournament.deleteMany({ category: { $in: category_ids } });
+
+    age_class.closed = false;
+    await age_class.save();
+
+    return success(res, age_class);
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
+});
