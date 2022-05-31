@@ -19,9 +19,13 @@ const server_url = process.env.SERVER_URL;
 const mongo_url = process.env.MONGO_URL;
 const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
 
-if ([server_port, server_url, mongo_url, access_token_secret].includes(undefined)) {
-  throw new Error('Application not correctly configured, please copy .env.example to .env ' +
-    'and update it with your configuration, then restart.');
+if (
+  [server_port, server_url, mongo_url, access_token_secret].includes(undefined)
+) {
+  throw new Error(
+    'Application not correctly configured, please copy .env.example to .env ' +
+      'and update it with your configuration, then restart.'
+  );
 }
 
 mongoose.connect(process.env.MONGO_URL);
@@ -36,11 +40,18 @@ declare global {
 }
 
 // for cors policy
-app.use(cors({ origin: '*' }));
+app.use(
+  cors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
 
 // log requests
 app.use((req, res, next) => {
-  console.log(`requested ${req.url}`);
+  console.log(`requested ${req.method} ${req.url}`);
   next();
 });
 
@@ -58,9 +69,11 @@ app.use('/api/v2/', api_v2_router);
 app.get('*', async (req, res) => {
   res.status(404).send({
     success: 0,
-    error: 'page not found'
+    error: 'page not found',
   });
 });
 
 // start server
-app.listen(server_port, () => console.log(`Listening on ${server_url}:${server_port}`));
+app.listen(server_port, () =>
+  console.log(`Listening on ${server_url}:${server_port}`)
+);
