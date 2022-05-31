@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import { AgeClass, Athlete, Category, Competition, Tournament, User } from '../src/schemas';
-import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import { AgeClass, Athlete, Category, Competition, Tournament, User } from '../src/schemas';
 import { AgeClassInterface } from '../src/schemas/AgeClass';
 import { CategoryInterface } from '../src/schemas/Category';
 import { AthleteInterface } from '../src/schemas/Athlete';
@@ -167,6 +167,129 @@ test(`GET ${athlete_route} should give back all the athletes with a valid jwt`, 
         weight: 47,
       }
     ],
+    status: 'success'
+  });
+});
+
+test(`POST ${athlete_route} should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(athlete_route, {
+    method: 'POST'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Unauthorized',
+    status: 'fail'
+  });
+});
+
+test(`POST ${athlete_route} should give back an error if the parameters in the body are not of a valid type`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Arturo',
+    surname: 'De Rosa',
+    competition: competition_id.toString(),
+    club: ['Judo Trieste', 'Judo Firenze'],
+    gender: 'M',
+    weight: 48,
+    birth_year: 2013
+  };
+
+  const res = await node_fetch(athlete_route, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Athlete validation failed: club: Cast to string failed for value "[ \'Judo Trieste\', \'Judo Firenze\' ]" (type Array) at path "club"',
+    status: 'error'
+  });
+});
+
+test(`POST ${athlete_route} should give back an error if the parameters in the body are not enough`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Arturo',
+    surname: 'De Rosa',
+    competition: competition_id.toString(),
+    gender: 'M',
+    weight: 48,
+    birth_year: 2012
+  };
+
+  const res = await node_fetch(athlete_route, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      authorization: access_token,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Campi Incompleti',
+    status: 'fail'
+  });
+});
+
+test(`POST ${athlete_route} should give correctly create a new athlete with the right parameters in input`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Arturo',
+    surname: 'De Rosa',
+    club: 'Judo Firenze',
+    competition: competition_id.toString(),
+    gender: 'M',
+    weight: 48,
+    birth_year: 2012
+  };
+
+  const res = await node_fetch(athlete_route, {
+    method: 'POST',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res.data).toHaveProperty('_id');
+
+  // automatically generated id, not retrievable
+  delete json_res.data._id;
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      name: 'Arturo',
+      surname: 'De Rosa',
+      club: 'Judo Firenze',
+      category: category_id_1.toString(),
+      competition: competition_id.toString(),
+      gender: 'M',
+      weight: 48,
+      birth_year: 2012
+    },
     status: 'success'
   });
 });
