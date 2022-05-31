@@ -9,8 +9,8 @@ export interface TournamentInterface {
   finished: boolean;
   athletes: Types.ObjectId[];
   winners_bracket: (Types.ObjectId | MatchInterface)[][];
-  recovered_bracket_1: Types.ObjectId[][];
-  recovered_bracket_2: Types.ObjectId[][];
+  recovered_bracket_1: (Types.ObjectId | MatchInterface)[][];
+  recovered_bracket_2: (Types.ObjectId | MatchInterface)[][];
 }
 
 const tournament_schema = new Schema<TournamentInterface>({

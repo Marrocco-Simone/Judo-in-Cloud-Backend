@@ -14,7 +14,7 @@ export type RoundT = (MatchT | null)[]
 export type BracketT = RoundT[];
 export interface BracketsT {
   main: BracketT;
-  recovery: [BracketT, BracketT] | null;
+  recovery: [BracketT, BracketT];
 }
 
 /**
@@ -27,7 +27,10 @@ export function toUtilsBracket (bracket: MatchInterface[][]): BracketT {
       if (match === null) {
         return null;
       }
-      const players = [match.white_athlete._id, match.red_athlete._id];
+      const players = [
+        match.white_athlete?._id ?? null,
+        match.red_athlete?._id ?? null
+      ];
       let winnerIdx: number | null = null;
       if (match.winner_athlete !== null) {
         winnerIdx = match.winner_athlete.equals(players[0]) ? 0 : 1;
@@ -48,14 +51,14 @@ export function toUtilsBracket (bracket: MatchInterface[][]): BracketT {
 export function toJicBracket(
   bracket: BracketT,
   tournament: TournamentInterface,
-  jicBracket?: MatchInterface[][],
+  jicBracket?: (MatchInterface & Document)[][],
 ): MatchInterface[][] {
   return bracket.map((round, roundIdx) => {
     return round.map((match, matchIdx) => {
       if (match === null) {
         return null;
       }
-      const originalMatch: MatchInterface = jicBracket?.[roundIdx]?.[matchIdx] ?? {
+      const originalMatch: MatchInterface = jicBracket?.[roundIdx]?.[matchIdx]?.toObject() ?? {
         // white_athlete: null,
         // red_athlete: null,
         // winner_athlete: null,
@@ -98,12 +101,13 @@ export async function storeJicBrackets (
     ...winners_bracket.flat().flat(),
     ...recovered_bracket_1.flat().flat(),
     ...recovered_bracket_2.flat().flat(),
-  ].filter(x => x !== null).map(match => {
+  ].filter(match => match !== null).map(match => {
     if (match._id === undefined) {
       match._id = new mongoose.mongo.ObjectId() as Types.ObjectId;
     }
     return match;
   });
+  console.debug({ all_matches });
   await Match.bulkWrite(all_matches.map(
     match => ({
       updateOne: {
@@ -381,7 +385,7 @@ export function calculateVictory (bracket: BracketT, roundIdx: number, idx: numb
 export function calculateMainVictory (brackets: BracketsT, roundIdx: number, idx: number, winnerIdx: number): BracketsT {
   brackets = { ...brackets };
   brackets.main = calculateVictory(brackets.main, roundIdx, idx, winnerIdx);
-  if (brackets.recovery === null) {
+  if (brackets.recovery[0].length === 0) {
     // no recovery brackets
     return brackets;
   }
@@ -412,7 +416,7 @@ function setMatchPlayer (match: MatchT | null, player: PlayerT, playerIdx: numbe
  */
 export function recoverLosers (brackets: BracketsT, roundIdx: number, idx: number): BracketsT {
   // if the player reached the quarter finals, recover the losers
-  if (brackets.recovery === null) {
+  if (brackets.recovery[0].length === 0) {
     throw new Error('Cannot recover losers if recovery brackets are missing');
   }
   const newBrackets = { ...brackets };
