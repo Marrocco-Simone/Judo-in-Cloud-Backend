@@ -57,9 +57,10 @@ athlete_router.post('/', async (req, res) => {
     error(res, err.message, 400);
   }
 });
+
 async function computeCategory(birth_year: number, weight: number, gender: 'M'|'F') {
   const d = new Date();
-  const current_year:number = d.getFullYear();
+  const current_year: number = d.getFullYear();
   const athlete_age = current_year - birth_year;
   const category = await Category.find({ gender, max_weight: { $gt: weight } }).populate('age_class');
   let best_category = category[0];
