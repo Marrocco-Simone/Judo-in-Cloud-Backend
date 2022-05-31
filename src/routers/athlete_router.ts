@@ -26,7 +26,8 @@ athlete_router.get('/club', async (req, res) => {
     for (const athlete of athletes) {
       clubs.add(athlete.club);
     }
-    success(res, clubs, 200);
+    const clubs_array = Array.from(clubs);
+    success(res, clubs_array, 200);
   } catch (err) {
     fail(res, 'Internal error', 500);
   }
