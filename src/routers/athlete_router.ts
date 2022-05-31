@@ -20,38 +20,45 @@ athlete_router.get('/', async (req, res) => {
 // Creating One
 athlete_router.post('/', async (req, res) => {
   const body: {
-    name: string,
-    surname: string,
-    competition: string,
-    club: string,
-    gender: 'M'|'F',
-    weight: number,
-    birth_year: number
+    name: string;
+    surname: string;
+    user: { competition: { _id: string } };
+    club: string;
+    gender: 'M' | 'F';
+    weight: number;
+    birth_year: number;
   } = req.body;
 
   if (
     !body.name ||
     !body.surname ||
-    !body.competition ||
     !body.club ||
     !body.gender ||
     !body.weight ||
     !body.birth_year
-  ) fail(res, 'Campi Incompleti');
+  ) {
+    fail(res, 'Campi Incompleti');
+  }
 
-  if (body.gender !== 'M' && body.gender !== 'F') fail(res, 'Campo gender deve essere M o F');
+  if (body.gender !== 'M' && body.gender !== 'F') {
+    fail(res, 'Campo gender deve essere M o F');
+  }
 
-  const athlete = new Athlete({
-    name: body.name,
-    surname: body.surname,
-    club: body.club,
-    competition: body.competition,
-    gender: body.gender,
-    weight: body.weight,
-    birth_year: body.birth_year,
-    category: await computeCategory(body.birth_year, body.weight, body.gender)
-  });
   try {
+    const athlete = new Athlete({
+      name: body.name,
+      surname: body.surname,
+      club: body.club,
+      competition: req.user.competition._id,
+      gender: body.gender,
+      weight: body.weight,
+      birth_year: body.birth_year,
+      category: await computeCategory(
+        body.birth_year,
+        body.weight,
+        body.gender
+      ),
+    });
     const new_athlete = await athlete.save();
     success(res, new_athlete);
   } catch (err) {
@@ -59,11 +66,18 @@ athlete_router.post('/', async (req, res) => {
   }
 });
 
-async function computeCategory(birth_year: number, weight: number, gender: 'M'|'F') {
+async function computeCategory(
+  birth_year: number,
+  weight: number,
+  gender: 'M' | 'F'
+) {
   const d = new Date();
-  const current_year:number = d.getFullYear();
+  const current_year: number = d.getFullYear();
   const athlete_age = current_year - birth_year;
-  const category = await Category.find({ gender, max_weight: { $gt: weight } }).populate('age_class');
+  const category = await Category.find({
+    gender,
+    max_weight: { $gt: weight },
+  }).populate('age_class');
   let best_category = category[0];
   for (const cat of category) {
     // @ts-ignore
