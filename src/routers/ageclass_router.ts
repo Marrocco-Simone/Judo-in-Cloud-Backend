@@ -1,8 +1,8 @@
 import express = require('express');
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
-import { Athlete, Category, Match, Tournament } from '../schemas';
-import { generateMainBracket } from '../helpers/bracket_utils';
+import { Athlete, Category, Tournament } from '../schemas';
+import { toJicBracket, storeJicBrackets, generateBrackets } from '../helpers/bracket_utils';
 import { CompetitionInterface } from '../schemas/Competition';
 import { CategoryInterface } from '../schemas/Category';
 /** api for matches */
@@ -102,24 +102,12 @@ async function closeAgeClass(
     });
     await tournament.save();
 
-    const main_bracket = generateMainBracket(tournament, category_athletes);
-
-    // save all the existing matches
-    tournament.winners_bracket = await Promise.all(
-      main_bracket.map(async (round_data) => {
-        return await Promise.all(
-          round_data.map(async (match) => {
-            if (match === null) {
-              return null;
-            }
-            await match.save();
-            return match._id;
-          })
-        );
-      })
+    const brackets = generateBrackets(category_athletes.map(athlete => athlete._id));
+    await storeJicBrackets(
+      tournament,
+      toJicBracket(brackets.main, tournament),
+      toJicBracket(brackets.recovery[0], tournament),
+      toJicBracket(brackets.recovery[1], tournament)
     );
-
-    // save the tournament again, this time with the winners bracket
-    await tournament.save();
   }
 }

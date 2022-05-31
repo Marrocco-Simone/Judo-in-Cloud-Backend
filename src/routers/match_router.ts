@@ -84,12 +84,13 @@ match_router.post('/:match_id', async (req, res) => {
       }
       const [round_idx, idx] = pos_info;
       bracket[round_idx][idx] = match;
-      tournament.winners_bracket = (await calculateVictory(bracket, round_idx, idx)).map(round => {
-        return round.map(match => {
-          return match?._id ?? null;
-        });
-      });
-      await tournament.save();
+      // WIP
+      // tournament.winners_bracket = (await calculateVictory(bracket, round_idx, idx)).map(round => {
+      //   return round.map(match => {
+      //     return match?._id ?? null;
+      //   });
+      // });
+      // await tournament.save();
     }
     await match.save();
     success(res, match);
