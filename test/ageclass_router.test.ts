@@ -408,7 +408,7 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Not enough parameters in the params',
+    message: 'Campi incompleti',
     status: 'fail'
   });
 });
@@ -503,8 +503,14 @@ test(`POST ${age_class_route}/:age_class_id should close the age class with the 
 
   expect(await Tournament.count({})).toBe(1);
 
+  const tournament = await (await Tournament.findOne({})).toJSON();
+
+  expect(tournament).toHaveProperty('_id');
+  expect(tournament).toHaveProperty('winners_bracket');
+
   // remove information that we cannot retrieve, ids generated automatically
-  const tournament = await (await Tournament.findOne({}, { _id: 0, winners_bracket: 0 })).toJSON();
+  delete tournament._id;
+  delete tournament.winners_bracket;
 
   expect(tournament).toEqual({
     __v: 1,

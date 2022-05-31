@@ -73,7 +73,7 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
     if (body.params != null) {
       const { match_time, supplemental_match_time, ippon_to_win, wazaari_to_win, ippon_timer, wazaari_timer } = body.params;
 
-      if (!match_time || !supplemental_match_time || !ippon_to_win || !wazaari_to_win || !ippon_timer || !wazaari_timer) return fail(res, 'Not enough parameters in the params');
+      if (!match_time || !supplemental_match_time || !ippon_to_win || !wazaari_to_win || !ippon_timer || !wazaari_timer) return fail(res, 'Campi incompleti');
 
       age_class.params = body.params;
     }

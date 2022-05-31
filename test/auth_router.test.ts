@@ -93,6 +93,8 @@ test(`GET ${auth_route} should give back the user associated to the jwt if valid
 
   const json_res = await res.json();
 
+  expect(json_res.data).toHaveProperty('password');
+
   // hashed information that we cannot retrieve or reproduce
   delete json_res.data.password;
 
@@ -169,9 +171,6 @@ test(`POST ${auth_route} should give an error message if the password inside the
 });
 
 test(`POST ${auth_route} should correctly log in a user, given valid username and password inside the body`, async () => {
-  const valid_user = { _id: user_id_1, username: 'validUser' };
-  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
-
   const req_body = {
     username: 'validUser',
     password: 'pwd'
@@ -187,12 +186,16 @@ test(`POST ${auth_route} should correctly log in a user, given valid username an
 
   const json_res = await res.json();
 
+  expect(json_res.data).toHaveProperty('access_token');
+  expect(json_res.data.user).toHaveProperty('password');
+
+  // generating another access_token on the fly makes the test flaky, as it may be different from the one generated from the route
+  delete json_res.data.access_token;
   // hashed information that we cannot retrieve or reproduce
   delete json_res.data.user.password;
 
   expect(json_res).toEqual({
     data: {
-      access_token: access_jwt,
       user: {
         __v: 0,
         _id: user_id_1.toString(),
