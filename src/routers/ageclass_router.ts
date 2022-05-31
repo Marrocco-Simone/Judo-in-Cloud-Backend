@@ -131,7 +131,7 @@ async function closeAgeClass(
   }
 }
 
-/* GIRARDI: API V2 */
+/* API V2 */
 /* se la classe d'eta' e' aperta, allora ritorniamo che e' possibile riaprirla */
 ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
   try {
@@ -166,7 +166,7 @@ ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
   }
 });
 
-/* GIRARDI: API V2 */
+/* API V2 */
 /* se la classe d'eta' e' gia' aperta, ritorniamo esito positivo */
 ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
   try {

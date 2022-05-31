@@ -19,7 +19,7 @@ athlete_router.get('/', async (req, res) => {
 });
 
 // Getting all clubs
-/* PORCELLI SECONDO SPRINT */
+/* API V2 */
 athlete_router.get('/club', async (req, res) => {
   const clubs = new Set();
   try {
@@ -84,7 +84,7 @@ athlete_router.post('/', async (req, res) => {
 });
 
 // Modify an athlete
-/* PORCELLI SECONDO SPRINT */
+/* API V2 */
 athlete_router.put('/:athlete_id', async (req, res) => {
   try {
     const id = new Types.ObjectId(req.params.athlete_id);
@@ -122,7 +122,7 @@ athlete_router.put('/:athlete_id', async (req, res) => {
 });
 
 // Delete an athlete
-/* PORCELLI SECONDO SPRINT */
+/* API V2 */
 athlete_router.delete('/:athlete_id', async (req, res) => {
   try {
     const id = new Types.ObjectId(req.params.athlete_id);
