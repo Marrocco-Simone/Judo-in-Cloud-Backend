@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "module": "CommonJS",
+        "esModuleInterop": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
