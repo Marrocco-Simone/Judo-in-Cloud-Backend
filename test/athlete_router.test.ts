@@ -247,7 +247,7 @@ test(`POST ${athlete_route} should give back an error if the parameters in the b
   });
 });
 
-test(`POST ${athlete_route} should give correctly create a new athlete with the right parameters in input`, async () => {
+test(`POST ${athlete_route} should correctly create a new athlete with the right parameters in input`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
