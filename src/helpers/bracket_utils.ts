@@ -64,8 +64,8 @@ export function toJicBracket(
         // winner_athlete: null,
         // loser_recovered: null,
         tournament: tournament._id,
-        is_started: false,
-        is_over: false,
+        is_started: match.winnerIdx !== null,
+        is_over: match.winnerIdx !== null,
         match_type: 0,
         match_scores: {
           final_time: 0,
@@ -82,7 +82,7 @@ export function toJicBracket(
         loser_recovered: match.loserRecovered,
         white_athlete: match.players[0],
         red_athlete: match.players[1],
-        winner_athlete: match.winnerIdx
+        winner_athlete: match.winnerIdx !== null
           ? match.players[match.winnerIdx]
           : null
       };
