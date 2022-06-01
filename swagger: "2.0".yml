@@ -42,6 +42,7 @@ tags:
 schemes:
 - "http"
 paths:
+  # Authorization documentation
   /auth:
     post:
       tags:
@@ -71,7 +72,8 @@ paths:
           description: "Username o password errati"
         "500":
           description: "Errore interno del sistema"
-        
+
+  # Athlete documentation  
   /athletes:
     get:
       tags:
@@ -224,9 +226,118 @@ paths:
       tags:
         - "Athlete"
       summary: "I need help over here"
+      parameters:
+        - in: "path"
+          name: "club ID"
+          description: "ID of the club ???"
+          required: true
+          type: "string"
+          format: "ObjectId"
       responses:
         "200":
           description: "I need help over here"
+
+  # Age class documentation
+
+
+  # Match documentation
+  /match/{match_id}:
+    get:
+      tags:
+        - "Match"
+      summary: "Data about the match passed"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "Match ID"
+          description: "ID of the match you want to retrieve data"
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        "200":
+          description: "Match Data"
+        "404":
+          description: "Match not found"
+        "500":
+          description: "Internal error"
+    post:
+      tags:
+        - "Match"
+      summary: "Update a given match"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: path
+          name: "Match ID"
+          description: "ID of the match you want to update"
+          required: true
+          type: "string"
+          format: "ObjectId"
+        - in: body
+          name: "Parameters"
+          description: "Data you want to update"
+          required: false # ???????????????????????????????????????????????????
+          schema:
+            type: "object"
+            properties: 
+              winner_athlete:
+                type: "string"
+                format: "ObjectId"
+                example: "629285f5d68e8d007ea3d726"
+              is_started:
+                type: "boolean"
+                default: true
+                example: true
+              is_over:
+                type: "boolean"
+                default: true
+                example: true
+              match_scores:
+                type: "object"
+                properties:
+                  final_time:
+                    type: "integer"
+                    example: 200
+                  white_ippon:
+                    type: "integer"
+                    example: 0
+                  white_wazaari:
+                    type: "integer"
+                    example:  1
+                  white_penalties:
+                    type: "integer"
+                    example:  1
+                  red_ippon:
+                    type: "integer"
+                    example:  1
+                  red_wazaari:
+                    type: "integer"
+                    example:  1
+                  red_penalties:
+                    type: "integer"
+                    example:  2
+      responses:
+        "200":
+          description: "Match updated"
+        "404":
+          description: "Match not found"
+        "500":
+          description: "Internal error"
+          
+        
+      deprecated: false
+      x-42c-no-authentication: false
+      x-42c-mtls: false
+      x-42c-sensitivity: 3
+      x-42c-weight-input: 80
+      x-42c-weight-output: 20
+      x-42c-weight-parameters: 50
+      x-42c-weight-requestBody: 50
+
 
         
       
