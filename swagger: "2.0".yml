@@ -185,7 +185,51 @@ paths:
           description: "Athlete not found"
         "500":
           description: "Internal error"
+    delete:
+      tags:
+        - "Athlete"
+      summary: "Delete an athlete"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "ID of the athlete that need to be delete"
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        "200":
+          description: "Athlete deleted"
+        "404":
+          description: "Athlete not found"
+        "500":
+          description: "Internal error"
+  /athlete/club:
+    get:
+      tags:
+        - "Athlete"
+      summary: "Retrieve all clubs"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "List of all clubs"
+        "500":
+          description: "Internal Error"
+  /athlete/club/{club}:
+    get:
+      tags:
+        - "Athlete"
+      summary: "I need help over here"
+      responses:
+        "200":
+          description: "I need help over here"
+
         
+      
         
         
       
