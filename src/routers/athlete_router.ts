@@ -3,6 +3,8 @@ import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete } from '../schemas/Athlete';
 const express = require('express');
+const swagger_ui = require('swagger-ui-express');
+const swagger_document = require('../../swagger.json');
 
 /** apis for athletes */
 export const athlete_router = express.Router();
@@ -76,3 +78,7 @@ async function computeCategory(birth_year: number, weight: number, gender: 'M'|'
   }
   return best_category._id;
 }
+
+// Create API document
+athlete_router.use('/api-docs', swagger_ui.serve);
+athlete_router.get('/api-docs', swagger_ui.setup(swagger_document));
