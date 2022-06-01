@@ -94,8 +94,6 @@ match_router.post('/:match_id', async (req, res) => {
         if (updated_brackets === null) {
           return error(res, 'Incontro non trovato nella bracket');
         }
-        // find the match within the winners bracket
-        // WIP
         await storeJicBrackets(
           tournament,
           toJicBracket(updated_brackets.main, tournament, tournament.winners_bracket as (MatchInterface & Document)[][]),
@@ -141,7 +139,7 @@ function getUpdatedBrackets (tournament: TournamentInterface, match: MatchInterf
     const pos_info = findMatch(recovery[i] as MatchInterface[][], match);
     if (pos_info !== null) {
       const [round_idx, idx] = pos_info;
-      utils_brackets[i] = calculateVictory(
+      utils_brackets.recovery[i] = calculateVictory(
         utils_brackets.recovery[i],
         round_idx,
         idx,
