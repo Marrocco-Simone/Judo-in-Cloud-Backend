@@ -334,6 +334,9 @@ export function generateMainBracket (players: PlayerT[]): BracketT {
     };
   }
 
+  if (players.length === 0) {
+    return bracket;
+  }
   return assignInitialVictories(bracket);
 }
 
