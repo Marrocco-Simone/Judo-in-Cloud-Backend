@@ -61,6 +61,7 @@ athlete_router.get('/club/:club', async (req, res) => {
     const athletes_send: (AthleteInterface & { tournament: Types.ObjectId })[] =
       athletes.map((athlete) => {
         return {
+          _id: athlete._id,
           name: athlete.name,
           surname: athlete.surname,
           club: athlete.club,
@@ -69,7 +70,7 @@ athlete_router.get('/club/:club', async (req, res) => {
           gender: athlete.gender,
           competition: athlete.competition,
           category: athlete.category,
-          tournament: category_to_tournament[`${athlete.category}`],
+          tournament: category_to_tournament[`${athlete.category._id}`],
         };
       });
 
