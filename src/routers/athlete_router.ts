@@ -40,7 +40,16 @@ athlete_router.get('/club', async (req, res) => {
 athlete_router.get('/club/:club', async (req, res) => {
   const club = req.params.club;
   try {
-    const athletes = await Athlete.find({ club });
+    const athletes = await Athlete.find({ club }).populate({
+      path: 'category',
+      model: 'Category',
+      populate: [
+        {
+          path: 'age_class',
+          model: 'AgeClass',
+        },
+      ],
+    });
     const tournaments = await Tournament.find();
 
     const category_to_tournament: { [category_id: string]: Types.ObjectId } =
