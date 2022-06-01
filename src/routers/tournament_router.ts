@@ -1,5 +1,5 @@
 import express = require('express');
-import { error, success } from '../controllers/base_controller';
+import { error, fail, success } from '../controllers/base_controller';
 import { Match } from '../schemas';
 import { Tournament } from '../schemas/Tournament';
 /** api for tournaments */
@@ -99,6 +99,31 @@ tournament_router.get('/:tournament_id/next', async (req, res) => {
     });
   } catch (err) {
     error(res, err.message, 500);
+  }
+});
+
+// Reserve a tournament
+tournament_router.post('/reserve', async (req, res) => {
+  try {
+    const id = req.body._id;
+    Tournament.exists({ _id: id }, function (err, doc) {
+      if (err) {
+        fail(res, err.message, 500);
+      }
+      if (doc==null) {
+        fail(res, 'Athlete not found', 404);
+      }
+    });
+    const update_tournament = await Tournament.findByIdAndUpdate(id,
+      {
+        tatami_number: req.body.tatami_number
+      }, {
+        new: true
+      });
+    const updated_tournament = await update_tournament.save();
+    success(res, updated_tournament, 200);
+  } catch (error) {
+    fail(res, error.message, 500);
   }
 });
 
