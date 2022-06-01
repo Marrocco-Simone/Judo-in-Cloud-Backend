@@ -111,7 +111,7 @@ tournament_router.post('/reserve', async (req, res) => {
         fail(res, err.message, 500);
       }
       if (doc==null) {
-        fail(res, 'Athlete not found', 404);
+        fail(res, 'Tournament not found', 404);
       }
     });
     const update_tournament = await Tournament.findByIdAndUpdate(id,
