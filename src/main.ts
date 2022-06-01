@@ -14,7 +14,7 @@ import { UserInterface } from './schemas/User';
 import { api_v2_router } from './routers/api_v2';
 
 const app = express();
-const server_port = process.env.SERVER_PORT;
+const server_port = process.env.PORT || process.env.SERVER_PORT;
 const server_url = process.env.SERVER_URL;
 const mongo_url = process.env.MONGO_URL;
 const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
