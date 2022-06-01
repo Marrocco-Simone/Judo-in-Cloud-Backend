@@ -72,21 +72,123 @@ paths:
         "500":
           description: "Errore interno del sistema"
         
-  /athlete:
+  /athletes:
     get:
       tags:
         - "Athlete"
-      summary: "Create a new athlete"
+      summary: "Retrieving list of athlets"
       consumes:
         - "application/json"
       produces:
         - "application/json"
+      security:
+        - Bearer: []
       responses:
         "200":
-          description: "List of athletes"
+          description: "Lista degli atleti"
         "500":
-          description: "Internal Error"
+          description: "Errore interno del sistema"
+    post:
+      tags:
+        - "Athlete"
+      summary: "Add new athlete"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          schema:
+            type: "object"
+            properties: 
+              name:
+                type: "string"
+                example: "Mario"
+              surname:
+                type: "string"
+                example: "Rossi"
+              competition:
+                type: "string"
+                format: "ObjectId"
+                example: "629111bd4152f747de72b9ca"
+              club:
+                type: "string"
+                example: "Judo Torino"
+              gender:
+                type: "string"
+                enum:
+                  - "M"
+                  - "F"
+              weight:
+                type: integer
+                example: 90
+              birth_year:
+                type: "integer"
+                example: 2000
+      responses:
+        "200":
+          description: "Athlete created"
+        "500":
+          description: "Internal error"
+  /athletes/{athlete_id}:
+    patch:
+      tags:
+        - "Athlete"
+      summary: "Update an athlete"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "ID of the athlete that need to be update"
+          required: true
+          type: "string"
+          format: "ObjectId"
+        - in: "body"
+          name: "body"
+          description: "Paramenters that need to be update. Everyone are NOT required, but at least one must be passed"
+          schema:
+            type: "object"
+            properties: 
+              name:
+                type: "string"
+                example: "Mario"
+              surname:
+                type: "string"
+                example: "Rossi"
+              competition:
+                type: "string"
+                format: "ObjectId"
+                example: "629111bd4152f747de72b9ca"
+              club:
+                type: "string"
+                example: "Judo Torino"
+              gender:
+                type: "string"
+                enum:
+                  - "M"
+                  - "F"
+              weight:
+                type: integer
+                example: 90
+              birth_year:
+                type: "integer"
+                example: 2000
 
+      responses:
+        "200":
+          description: "Athlete Modified"
+        "404":
+          description: "Athlete not found"
+        "500":
+          description: "Internal error"
+        
+        
+        
+      
 
         
   /pet:
@@ -625,18 +727,14 @@ paths:
           description: "Invalid username supplied"
         "404":
           description: "User not found"
+
 securityDefinitions:
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
-    flow: "implicit"
-    scopes:
-      write:pets: "modify pets in your account"
-      read:pets: "read your pets"
-  api_key:
+  Bearer:
     type: "apiKey"
-    name: "api_key"
+    name: "authorization"
     in: "header"
+
+
 definitions:
   Athlete:
     type: "object"
