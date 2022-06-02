@@ -1,4 +1,5 @@
 import express = require('express');
+import { isValidObjectId } from 'mongoose';
 import { error, fail, success } from '../controllers/base_controller';
 import { Match } from '../schemas';
 import { Tournament } from '../schemas/Tournament';
@@ -134,6 +135,12 @@ tournament_router.get('/:tournament_id/next', async (req, res) => {
 tournament_router.post('/reserve/:tournament_id', async (req, res) => {
   try {
     const id = req.params.tournament_id;
+    if (!isValidObjectId(id)) {
+      fail(res, 'Tournament id is not valid');
+    }
+    if (req.body.tatami_number === null) {
+      fail(res, 'You must pass a tatami number');
+    }
     const update_tournament = await Tournament.findById(id);
     if (update_tournament === null) {
       fail(res, 'Tournament not found', 404);
