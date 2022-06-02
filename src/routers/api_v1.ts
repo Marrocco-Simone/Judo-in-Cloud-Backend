@@ -3,7 +3,7 @@ import { get_age_class, get_age_classes, update_age_class } from '../controllers
 import { create_athlete, get_athletes } from '../controllers/athletes_controller';
 import { login, me } from '../controllers/auth_controller';
 import { get_match, update_match } from '../controllers/matches_controller';
-import { get_next_matches, get_tournament, get_tournaments } from '../controllers/tournaments_controller';
+import { get_tournament_matches, get_tournament, get_tournaments } from '../controllers/tournaments_controller';
 import { authenticate_token } from '../middlewares/AuthenticateMiddleware';
 import { requires_competition } from '../middlewares/RequiresCompetition';
 
@@ -33,7 +33,7 @@ const tournaments_router = app.Router();
 tournaments_router.use(authenticate_token, requires_competition);
 tournaments_router.get('/', get_tournaments);
 tournaments_router.get('/:tournament_id', get_tournament);
-tournaments_router.get('/:tournament_id/next', get_next_matches);
+tournaments_router.get('/:tournament_id/matches', get_tournament_matches);
 
 // routes for authentication
 const auth_router = app.Router();

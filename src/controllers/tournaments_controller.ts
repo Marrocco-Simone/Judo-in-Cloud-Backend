@@ -61,8 +61,8 @@ export const get_tournaments: RequestHandler = async (req, res) => {
   }
 };
 
-// Get next match for tournament by id
-export const get_next_matches: RequestHandler = async (req, res) => {
+// Get all matches for tournament by id
+export const get_tournament_matches: RequestHandler = async (req, res) => {
   try {
     const tournament_id = req.params.tournament_id;
     const tournament = await Tournament.findById(tournament_id)
@@ -89,21 +89,9 @@ export const get_next_matches: RequestHandler = async (req, res) => {
       );
     }
 
-    const winners_bracket_next = await getNextMatches({
-      bracket: winners_bracket,
-    });
-    const recovered_bracket_next_1 = await getNextMatches({
-      bracket: recovered_bracket_1,
-    });
-    const recovered_bracket_next_2 = await getNextMatches({
-      bracket: recovered_bracket_2,
-    });
+    const matches = await getMatches({ winners_bracket, recovered_bracket_1, recovered_bracket_2 });
 
-    success(res, {
-      winners_bracket_next,
-      recovered_bracket_next_1,
-      recovered_bracket_next_2,
-    });
+    success(res, matches);
   } catch (err) {
     error(res, err.message, 500);
   }
@@ -132,14 +120,15 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
   }
 };
 
-async function getNextMatches({ bracket }) {
-  const bracket_next = [];
+async function getMatches({ winners_bracket, recovered_bracket_1, recovered_bracket_2 }) {
+  const matches = [];
 
-  for (const round of bracket) {
+  for (let r = 0; r < winners_bracket.length; r++) {
+    const round = winners_bracket[r];
     if (!round) continue;
+
     for (const match_id of round) {
       if (!match_id) continue;
-      // TODO: load all matches upfront to avoid N + 1 problem
       const match = await Match.findById(match_id);
       if (!match) {
         throw new Error(
@@ -147,9 +136,42 @@ async function getNextMatches({ bracket }) {
         );
       }
 
-      if (!match.is_started) bracket_next.push(match);
+      matches.push(match);
+    }
+
+    if (r === 0) continue;
+
+    const recovered_round_1 = recovered_bracket_1[r-1];
+    const recovered_round_2 = recovered_bracket_2[r-1];
+
+    if (recovered_round_1) {
+      for (const match_id of recovered_round_1) {
+        if (!match_id) continue;
+        const match = await Match.findById(match_id);
+        if (!match) {
+          throw new Error(
+            "Found match_id which doesn't reference an existing match"
+          );
+        }
+
+        matches.push(match);
+      }
+    }
+
+    if (recovered_round_2) {
+      for (const match_id of recovered_round_2) {
+        if (!match_id) continue;
+        const match = await Match.findById(match_id);
+        if (!match) {
+          throw new Error(
+            "Found match_id which doesn't reference an existing match"
+          );
+        }
+
+        matches.push(match);
+      }
     }
   }
 
-  return bracket_next;
+  return matches;
 }
