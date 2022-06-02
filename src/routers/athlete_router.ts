@@ -177,8 +177,8 @@ athlete_router.delete('/:athlete_id', async (req, res) => {
 
     await athlete.remove();
     success(res, athlete, 200);
-  } catch (error) {
-    fail(res, error.message, 500);
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
