@@ -321,7 +321,51 @@ paths:
           description: "Age class not found"
         "500":
           description: "Intrnal error"
+  /reopen/{age_class}:
+    get:
+      tags:
+        - "Age class"
+      summary: "If an age class has no started match it can be reopen, else no"
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: "ageclass_id"
+          description: "The ID of the age class of which you want to know if it can be reopened"
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        "200":
+          description: "True if the age class can be reopen, false otherwise"
+        "400":
+          description: "Age class not found"
+        "500":
+          description: "Internal error"
+    post:
+      tags:
+        - "Age class"
+      summary: "If the age group is already open, the result is positive"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "ageclass_id"
+          description: "The ID of the age class of which you want to reopened"
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        "200":
+          description: "Age class reopen"
+        "400":
+          description: "Age class not found"
+        "500":
+          description: "Internal error"
         
+    
+        
+      
       
 
   # Match documentation
@@ -553,16 +597,6 @@ paths:
           description: "Tournament not found"
         "500":
           description: "Internal error"
-        
-        
-     
-      
-        
-      
-          
-        
-      
-
 
 securityDefinitions:
   Bearer:
@@ -785,16 +819,6 @@ definitions:
         format: "ObjectId"
     xml:
       name: "User"          
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
 externalDocs:
   description: "Link to Backend Repository"
   url: "https://github.com/Marrocco-Simone/Judo-in-Cloud-Backend.git"
