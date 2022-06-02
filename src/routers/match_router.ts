@@ -1,4 +1,4 @@
-import express = require('express');
+import express from 'express';
 import { Match, MatchInterface } from '../schemas/Match';
 import { Athlete } from '../schemas/Athlete';
 import { AgeClass } from '../schemas/AgeClass';

@@ -99,13 +99,9 @@ athlete_router.post('/', async (req, res) => {
     !body.gender ||
     !body.weight ||
     !body.birth_year
-  ) {
-    fail(res, 'Campi Incompleti');
-  }
+  ) return fail(res, 'Campi Incompleti');
 
-  if (body.gender !== 'M' && body.gender !== 'F') {
-    fail(res, 'Campo gender deve essere M o F');
-  }
+  if (body.gender !== 'M' && body.gender !== 'F') return fail(res, 'Campo gender deve essere M o F');
 
   try {
     const athlete = new Athlete({

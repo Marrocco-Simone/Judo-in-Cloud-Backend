@@ -1,8 +1,9 @@
-import express = require('express');
+import express from 'express';
 import { isValidObjectId } from 'mongoose';
 import { error, fail, success } from '../controllers/base_controller';
 import { Match } from '../schemas';
 import { Tournament } from '../schemas/Tournament';
+
 /** api for tournaments */
 export const tournament_router = express.Router();
 
