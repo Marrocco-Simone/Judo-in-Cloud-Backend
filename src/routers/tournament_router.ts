@@ -138,7 +138,7 @@ tournament_router.post('/reserve/:tournament_id', async (req, res) => {
     if (!isValidObjectId(id)) {
       fail(res, 'Tournament id is not valid');
     }
-    if (req.body.tatami_number === null) {
+    if (typeof (req.body.tatami_number) === 'undefined') {
       fail(res, 'You must pass a tatami number');
     }
     const update_tournament = await Tournament.findById(id);
