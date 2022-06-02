@@ -134,7 +134,7 @@ paths:
         "500":
           description: "Internal error"
   /athletes/{athlete_id}:
-    patch:
+    put:
       tags:
         - "Athlete"
       summary: "Update an athlete"
