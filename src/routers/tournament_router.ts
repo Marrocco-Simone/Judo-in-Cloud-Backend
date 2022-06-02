@@ -134,9 +134,9 @@ tournament_router.get('/:tournament_id/next', async (req, res) => {
 tournament_router.post('/reserve', async (req, res) => {
   try {
     const id = req.body._id;
-    Tournament.exists({ _id: id }, function (err, doc) {
+    await Tournament.exists({ _id: id }, function (err, doc) {
       if (err) {
-        fail(res, err.message, 500);
+        error(res, err.message, 500);
       }
       if (doc==null) {
         fail(res, 'Tournament not found', 404);
@@ -149,9 +149,9 @@ tournament_router.post('/reserve', async (req, res) => {
         new: true
       });
     const updated_tournament = await update_tournament.save();
-    success(res, updated_tournament, 200);
+    success(res, updated_tournament);
   } catch (error) {
-    fail(res, error.message, 500);
+    error(res, error.message);
   }
 });
 
