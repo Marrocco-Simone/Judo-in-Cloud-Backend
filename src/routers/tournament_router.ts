@@ -149,8 +149,8 @@ tournament_router.post('/reserve/:tournament_id', async (req, res) => {
     update_tournament.tatami_number = req.body.tatami_number;
     const updated_tournament = await update_tournament.save();
     success(res, updated_tournament);
-  } catch (error) {
-    error(res, error.message);
+  } catch (err) {
+    error(res, err.message);
   }
 });
 
