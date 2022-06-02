@@ -1,6 +1,7 @@
 import app from 'express';
 import { get_age_class, get_age_classes, update_age_class } from '../controllers/age_classes_controller';
 import { create_athlete, get_athletes } from '../controllers/athletes_controller';
+import { login, me } from '../controllers/auth_controller';
 import { get_match, update_match } from '../controllers/matches_controller';
 import { get_next_matches, get_tournament, get_tournaments } from '../controllers/tournaments_controller';
 import { authenticate_token } from '../middlewares/AuthenticateMiddleware';
@@ -34,7 +35,15 @@ tournaments_router.get('/', get_tournaments);
 tournaments_router.get('/:tournament_id', get_tournament);
 tournaments_router.get('/:tournament_id/next', get_next_matches);
 
+// routes for authentication
+const auth_router = app.Router();
+auth_router.post('/', login);
+
+auth_router.use(authenticate_token);
+auth_router.get('/', me);
+
 api_v1_router.use('/age_classes', age_classes_router);
 api_v1_router.use('/athletes', athletes_router);
 api_v1_router.use('/matches', matches_router);
 api_v1_router.use('/tournaments', tournaments_router);
+api_v1_router.use('/auth', auth_router);
