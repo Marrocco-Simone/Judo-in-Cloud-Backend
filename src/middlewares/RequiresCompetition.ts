@@ -1,4 +1,4 @@
-import express = require('express');
+import express from 'express';
 import { error, fail } from '../controllers/base_controller';
 
 export const requires_competition: express.RequestHandler = (req, res, next) => {
