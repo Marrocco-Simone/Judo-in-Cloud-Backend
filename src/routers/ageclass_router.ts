@@ -2,7 +2,7 @@ import express from 'express';
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Athlete, Category, Match, Tournament } from '../schemas';
-import { generateMainBracket } from '../helpers/bracket_utils';
+import { toJicBracket, storeJicBrackets, generateBrackets } from '../helpers/bracket_utils';
 import { CompetitionInterface } from '../schemas/Competition';
 import { CategoryInterface } from '../schemas/Category';
 /** api for matches */
@@ -113,26 +113,77 @@ async function closeAgeClass(
     });
     await tournament.save();
 
-    const main_bracket = generateMainBracket(tournament, category_athletes);
-
-    // save all the existing matches
-    tournament.winners_bracket = await Promise.all(
-      main_bracket.map(async (round_data) => {
-        return await Promise.all(
-          round_data.map(async (match_data) => {
-            if (match_data === null) {
-              return null;
-            }
-            const match = new Match(match_data);
-            await match.save();
-            match_data._id = match._id;
-            return match._id;
-          })
-        );
-      })
+    const brackets = generateBrackets(category_athletes.map(athlete => athlete._id));
+    await storeJicBrackets(
+      tournament,
+      toJicBracket(brackets.main, tournament),
+      toJicBracket(brackets.recovery[0], tournament),
+      toJicBracket(brackets.recovery[1], tournament)
     );
-
-    // save the tournament again, this time with the winners bracket
-    await tournament.save();
   }
 }
+
+/* API V2 */
+/* se la classe d'eta' e' aperta, allora ritorniamo che e' possibile riaprirla */
+ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class.closed) return success(res, { can_reopen: true });
+
+    const category = await Category.find({ age_class: age_class_id });
+    const category_ids = category.map((cat) => cat._id);
+
+    const tournament = await Tournament.find({
+      category: { $in: category_ids },
+    }).populate({
+      path: 'winners_bracket',
+      model: 'Match',
+    });
+
+    for (const tour of tournament) {
+      for (const bracket of tour.winners_bracket) {
+        for (const match of bracket) {
+          // @ts-ignore
+          if (match?.is_started) return success(res, { can_reopen: false });
+        }
+      }
+    }
+
+    return success(res, { can_reopen: true });
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
+});
+
+/* API V2 */
+/* se la classe d'eta' e' gia' aperta, ritorniamo esito positivo */
+ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
+  try {
+    const age_class_id = req.params.age_class_id;
+    const age_class = await AgeClass.findById(age_class_id);
+    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class.closed) return success(res, age_class);
+
+    const category = await Category.find({ age_class: age_class_id });
+    const category_ids = category.map((cat) => cat._id);
+
+    const tournament = await Tournament.find({
+      category: { $in: category_ids },
+    });
+    const tournament_ids = tournament.map((tour) => tour._id);
+
+    await Match.deleteMany({ tournament: { $in: tournament_ids } });
+    await Tournament.deleteMany({ category: { $in: category_ids } });
+
+    age_class.closed = false;
+    await age_class.save();
+
+    return success(res, age_class);
+  } catch (err) {
+    console.error({ err });
+    error(res, err.message);
+  }
+});

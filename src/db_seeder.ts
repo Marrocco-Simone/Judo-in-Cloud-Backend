@@ -5,6 +5,8 @@ import { AgeClass, AgeClassInterface } from './schemas/AgeClass';
 import { Athlete, AthleteInterface } from './schemas/Athlete';
 import { Category, CategoryInterface } from './schemas/Category';
 import { Competition, CompetitionInterface } from './schemas/Competition';
+import slug from 'slug';
+
 /* import { Match, MatchInterface } from './schemas/Match'; */
 /* import { Tournament, TournamentInterface } from './schemas/Tournament'; */
 import { User, UserInterface } from './schemas/User';
@@ -21,6 +23,7 @@ function getCompetitions() {
   const competition_array: CompetitionInterface[] = [];
   competition_array.push({
     name: 'Gara Lavis',
+    slug: slug('Gara Lavis')
   });
   return competition_array;
 }
