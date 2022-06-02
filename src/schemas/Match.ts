@@ -1,13 +1,15 @@
 import { model, Schema, SchemaTypes, Types } from 'mongoose';
+import { TournamentInterface } from './Tournament';
 export interface MatchInterface {
   _id?: Types.ObjectId;
   white_athlete: Types.ObjectId;
   red_athlete: Types.ObjectId;
   winner_athlete: Types.ObjectId;
-  tournament: Types.ObjectId;
+  tournament: Types.ObjectId | TournamentInterface;
   is_started: boolean;
   is_over: boolean;
   match_type: number;
+  loser_recovered: boolean;
   match_scores: {
     final_time: number;
     white_ippon: number;
@@ -39,6 +41,7 @@ const match_schema = new Schema<MatchInterface>({
   is_started: Boolean,
   is_over: Boolean,
   match_type: Number,
+  loser_recovered: Boolean,
   match_scores: {
     final_time: Number,
     white_ippon: Number,

@@ -45,6 +45,34 @@ tournament_router.get('/:tournament_id', async (req, res) => {
           path: 'winner_athlete',
           model: 'Athlete'
         }]
+      })
+      .populate({
+        path: 'recovered_bracket_1',
+        model: 'Match',
+        populate: [{
+          path: 'red_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'white_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'winner_athlete',
+          model: 'Athlete'
+        }]
+      })
+      .populate({
+        path: 'recovered_bracket_2',
+        model: 'Match',
+        populate: [{
+          path: 'red_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'white_athlete',
+          model: 'Athlete'
+        }, {
+          path: 'winner_athlete',
+          model: 'Athlete'
+        }]
       });
     if (!tournament) throw new Error('No tournament found');
 
