@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { error, fail, success } from './base_controller';
-import jwt = require('jsonwebtoken');
-import bcrypt = require('bcrypt');
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { User } from '../schemas/User';
 
 export const login: RequestHandler = async function(req, res) {

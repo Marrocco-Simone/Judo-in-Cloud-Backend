@@ -1,27 +1,23 @@
-// export {}; //needed or typescripts gives some strange errors
 import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete, AthleteInterface } from '../schemas/Athlete';
 import { Types } from 'mongoose';
 import { Tournament } from '../schemas';
-const express = require('express');
-
-/** apis for athletes */
-export const athlete_router = express.Router();
+import { RequestHandler } from 'express';
 
 // Getting all
-athlete_router.get('/', async (req, res) => {
+export const get_athletes: RequestHandler = async (req, res) => {
   try {
     const athletes = await Athlete.find();
     success(res, athletes);
   } catch (err) {
     error(res, err.message, 500);
   }
-});
+};
 
 // Getting all clubs
 /* API V2 */
-athlete_router.get('/club', async (req, res) => {
+export const get_clubs: RequestHandler = async (req, res) => {
   const clubs = new Set();
   try {
     const athletes = await Athlete.find();
@@ -33,11 +29,11 @@ athlete_router.get('/club', async (req, res) => {
   } catch (err) {
     fail(res, 'Internal error', 500);
   }
-});
+};
 
 // Getting athetes of club + tournament_id
 /* API V2 */
-athlete_router.get('/club/:club', async (req, res) => {
+export const get_athletes_by_club = async (req, res) => {
   const club = req.params.club;
   try {
     const athletes = await Athlete.find({ club }).populate({
@@ -78,10 +74,10 @@ athlete_router.get('/club/:club', async (req, res) => {
   } catch (err) {
     fail(res, 'Internal error', 500);
   }
-});
+};
 
 // Creating One
-athlete_router.post('/', async (req, res) => {
+export const create_athlete: RequestHandler = async (req, res) => {
   const body: {
     name: string;
     surname: string;
@@ -92,6 +88,7 @@ athlete_router.post('/', async (req, res) => {
     birth_year: number;
   } = req.body;
 
+  console.log(req.user);
   if (
     !body.name ||
     !body.surname ||
@@ -99,13 +96,9 @@ athlete_router.post('/', async (req, res) => {
     !body.gender ||
     !body.weight ||
     !body.birth_year
-  ) {
-    fail(res, 'Campi Incompleti');
-  }
+  ) return fail(res, 'Campi Incompleti');
 
-  if (body.gender !== 'M' && body.gender !== 'F') {
-    fail(res, 'Campo gender deve essere M o F');
-  }
+  if (body.gender !== 'M' && body.gender !== 'F') return fail(res, 'Campo gender deve essere M o F');
 
   try {
     const athlete = new Athlete({
@@ -127,11 +120,11 @@ athlete_router.post('/', async (req, res) => {
   } catch (err) {
     error(res, err.message, 500);
   }
-});
+};
 
 // Modify an athlete
 /* API V2 */
-athlete_router.put('/:athlete_id', async (req, res) => {
+export const update_athlete = async (req, res) => {
   try {
     const id = new Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
@@ -165,11 +158,11 @@ athlete_router.put('/:athlete_id', async (req, res) => {
   } catch (err) {
     error(res, err.message, 500);
   }
-});
+};
 
 // Delete an athlete
 /* API V2 */
-athlete_router.delete('/:athlete_id', async (req, res) => {
+export const delete_athlete: RequestHandler = async (req, res) => {
   try {
     const id = new Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
@@ -180,7 +173,7 @@ athlete_router.delete('/:athlete_id', async (req, res) => {
   } catch (err) {
     fail(res, err.message, 500);
   }
-});
+};
 
 /* TODO aggiungere classe pesi massimi, tipo 100+ */
 async function computeCategory(

@@ -1,14 +1,13 @@
-import express = require('express');
+import express from 'express';
+import { RequestHandler } from 'express';
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Athlete, Category, Match, Tournament } from '../schemas';
 import { toJicBracket, storeJicBrackets, generateBrackets } from '../helpers/bracket_utils';
 import { CompetitionInterface } from '../schemas/Competition';
 import { CategoryInterface } from '../schemas/Category';
-/** api for matches */
-export const ageclass_router = express.Router();
 
-ageclass_router.get('/', async (req, res) => {
+export const get_age_classes: RequestHandler = async (req, res) => {
   try {
     const age_classes = await AgeClass.find();
     const categories = await Category.find();
@@ -31,9 +30,9 @@ ageclass_router.get('/', async (req, res) => {
     console.log(e);
     error(res, e.message);
   }
-});
+};
 
-ageclass_router.get('/:age_class_id', async (req, res) => {
+export const get_age_class: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
@@ -43,9 +42,9 @@ ageclass_router.get('/:age_class_id', async (req, res) => {
     console.log(e);
     error(res, e.message);
   }
-});
+};
 
-ageclass_router.post('/:age_class_id', async (req, res) => {
+export const update_age_class: RequestHandler = async (req, res) => {
   const user = req.user;
   const competition = user.competition;
   try {
@@ -70,7 +69,13 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
     }
 
     if (body.closed != null) age_class.closed = body.closed;
-    if (body.params != null) age_class.params = body.params;
+    if (body.params != null) {
+      const { match_time, supplemental_match_time, ippon_to_win, wazaari_to_win, ippon_timer, wazaari_timer } = body.params;
+
+      if (!match_time || !supplemental_match_time || !ippon_to_win || !wazaari_to_win || !ippon_timer || !wazaari_timer) return fail(res, 'Campi incompleti');
+
+      age_class.params = body.params;
+    }
 
     await age_class.save();
 
@@ -79,7 +84,7 @@ ageclass_router.post('/:age_class_id', async (req, res) => {
     console.error({ err });
     error(res, err.message);
   }
-});
+};
 
 async function closeAgeClass(
   competition: CompetitionInterface,
@@ -119,7 +124,7 @@ async function closeAgeClass(
 
 /* API V2 */
 /* se la classe d'eta' e' aperta, allora ritorniamo che e' possibile riaprirla */
-ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
+export const is_age_class_reopenable: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
@@ -150,11 +155,11 @@ ageclass_router.get('/reopen/:age_class_id', async (req, res) => {
     console.error({ err });
     error(res, err.message);
   }
-});
+};
 
 /* API V2 */
 /* se la classe d'eta' e' gia' aperta, ritorniamo esito positivo */
-ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
+export const reopen_age_class: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
@@ -180,4 +185,4 @@ ageclass_router.post('/reopen/:age_class_id', async (req, res) => {
     console.error({ err });
     error(res, err.message);
   }
-});
+};

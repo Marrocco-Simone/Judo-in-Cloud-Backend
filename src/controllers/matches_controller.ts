@@ -1,17 +1,13 @@
-import express = require('express');
+import { RequestHandler } from 'express';
 import { Match, MatchInterface } from '../schemas/Match';
-import { Athlete } from '../schemas/Athlete';
 import { AgeClass } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
 import { Document, Types } from 'mongoose';
 import { Category } from '../schemas/Category';
 import { Tournament, TournamentInterface } from '../schemas/Tournament';
 import { BracketsT, calculateMainVictory, calculateVictory, storeJicBrackets, toJicBracket, toUtilsBracket } from '../helpers/bracket_utils';
-/* import { Tournament } from '../schemas/Tournament'; */
-/** api for matches */
-export const match_router = express.Router();
 
-match_router.get('/:match_id', async (req, res) => {
+export const get_match: RequestHandler = async (req, res) => {
   try {
     const match_id = req.params.match_id;
     if (!Types.ObjectId.isValid(match_id)) return fail(res, 'Incontro non trovato', 400);
@@ -43,9 +39,9 @@ match_router.get('/:match_id', async (req, res) => {
     console.error({ e });
     error(res, e.message);
   }
-});
+};
 
-match_router.post('/:match_id', async (req, res) => {
+export const update_match: RequestHandler = async (req, res) => {
   try {
     const match_id = req.params.match_id;
     const match = await Match.findById(match_id);
@@ -111,7 +107,7 @@ match_router.post('/:match_id', async (req, res) => {
     console.error({ e });
     error(res, e.message);
   }
-});
+};
 
 function getUpdatedBrackets (tournament: TournamentInterface, match: MatchInterface, winner_idx: number): BracketsT {
   const utils_brackets: BracketsT = {

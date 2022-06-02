@@ -27,7 +27,7 @@ export const find_competition: RequestHandler = async (req, res) => {
 /**
  * get the tournaments for a competition
  */
-export const get_tournaments: RequestHandler = async (req, res) => {
+export const get_competition_tournaments: RequestHandler = async (req, res) => {
   const competition_id = req.params.competition_id;
   if (!mongoose.isValidObjectId(competition_id)) {
     return fail(res, 'Id competizione non valido');
