@@ -1,5 +1,4 @@
 // put here your routers
-import { tournament_router } from './routers/tournament_router';
 import { auth_router } from './routers/auth_router';
 
 import express from 'express';
@@ -40,7 +39,6 @@ app.use((req, res, next) => {
 // It parses incoming JSON requests and puts the parsed data in req.body
 app.use(express.json());
 
-app.use('/api/v1/tournaments', [authenticate_token, tournament_router]);
 app.use('/api/v1/auth', auth_router);
 app.use('/api/v1/', api_v1_router);
 app.use('/api/v2/', api_v2_router);
