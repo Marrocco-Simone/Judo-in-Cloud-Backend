@@ -10,7 +10,7 @@ info:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
 host: "localhost:2500"
-basePath: "/api/v1"
+basePath: "/api/v2"
 tags:
 - name: "Login"
   description: "API referred to login"
