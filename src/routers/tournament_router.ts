@@ -131,6 +131,7 @@ tournament_router.get('/:tournament_id/next', async (req, res) => {
   }
 });
 
+/* API V2 */
 // Reserve a tournament
 tournament_router.post('/reserve/:tournament_id', async (req, res) => {
   try {
