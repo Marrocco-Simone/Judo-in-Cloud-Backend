@@ -330,7 +330,29 @@ paths:
 
   # Competition documentation
 
-  # Tounrnament documentation
+  /find/{slug}:
+    get:
+      tags:
+        - "Competition"
+      summary: "Retrieve a given competition"
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: "Competition slug"
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        "200":
+          description: "Competition that you own the indicated slug field"
+        "404":
+          description: "Competition not found"
+        "500":
+          description: "Internal error"
+        
+
+  # Tournament documentation
   /tournament:
     get:
       tags:
