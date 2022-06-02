@@ -131,23 +131,14 @@ tournament_router.get('/:tournament_id/next', async (req, res) => {
 });
 
 // Reserve a tournament
-tournament_router.post('/reserve', async (req, res) => {
+tournament_router.post('/reserve/:tournament_id', async (req, res) => {
   try {
-    const id = req.body._id;
-    await Tournament.exists({ _id: id }, function (err, doc) {
-      if (err) {
-        error(res, err.message, 500);
-      }
-      if (doc==null) {
-        fail(res, 'Tournament not found', 404);
-      }
-    });
-    const update_tournament = await Tournament.findByIdAndUpdate(id,
-      {
-        tatami_number: req.body.tatami_number
-      }, {
-        new: true
-      });
+    const id = req.params.tournament_id;
+    const update_tournament = await Tournament.findById(id);
+    if (update_tournament === null) {
+      fail(res, 'Tournament not found', 404);
+    }
+    update_tournament.tatami_number = req.body.tatami_number;
     const updated_tournament = await update_tournament.save();
     success(res, updated_tournament);
   } catch (error) {
