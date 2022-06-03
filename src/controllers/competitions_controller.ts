@@ -55,15 +55,3 @@ export const get_competition_tournaments: RequestHandler = async (req, res) => {
     error(res, 'Errore nel trovare i tornei');
   }
 };
-
-export const delete_match: RequestHandler = async (req, res) => {
-  try {
-    const id = new Types.ObjectId(req.params.match_id);
-    const match = Match.findById(id);
-    if(!match) return fail(res, 'Match not found', 404);
-    await match.remove();
-    success(res, match, 200);
-  } catch (err) {
-    fail(res, err.message, 500);
-  }
-};
