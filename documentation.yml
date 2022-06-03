@@ -503,15 +503,22 @@ paths:
           description: "Competition not found"
         "500":
           description: "Internal error"
+  
+  /competition/{match_id}:
+    delete:
+      tags:
+        - "Competition"
+      summary: "Delete everything referred to a match"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "match_id"
+          description: "The ID of the match to be deleted"
+      
+      responses:
         
-      deprecated: false
-      x-42c-no-authentication: false
-      x-42c-mtls: false
-      x-42c-sensitivity: 3
-      x-42c-weight-input: 80
-      x-42c-weight-output: 20
-      x-42c-weight-parameters: 50
-      x-42c-weight-requestBody: 50
+
   # Tournament documentation
   /tournament:
     get:
