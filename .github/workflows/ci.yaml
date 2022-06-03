@@ -3,6 +3,10 @@ name: Node.js CI
 on:
   push:
 
+env:
+  MONGO_URL_TEST: mongodb://localhost/testdb
+  ACCESS_TOKEN_SECRET: somesecret
+
 jobs:
   test:
 
@@ -14,5 +18,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14.x
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: 5.0
+
       - run: npm ci
       - run: npm test
