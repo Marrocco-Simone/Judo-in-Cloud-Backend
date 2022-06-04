@@ -565,3 +565,24 @@ test(`DELETE ${invalid_athlete_route} should fail with status 400 bad request`, 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
+
+test(`DELETE ${athlete_1_route} should fail with status 400 since the age class has been closed`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  // close the age class
+  await AgeClass.findByIdAndUpdate(age_class_id_1, { closed: true });
+
+  const res = await node_fetch(athlete_1_route, {
+    method: 'DELETE',
+    headers: { authorization }
+  });
+
+  expect(res.status).toBe(400);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
+});
