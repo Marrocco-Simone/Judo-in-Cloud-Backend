@@ -72,6 +72,14 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
       .populate({
         path: 'winners_bracket',
         model: 'Match',
+      })
+      .populate({
+        path: 'recovered_bracket_1',
+        model: 'Match',
+      })
+      .populate({
+        path: 'recovered_bracket_2',
+        model: 'Match',
       });
     if (!tournament) throw new Error('No tournament found');
 
@@ -83,17 +91,14 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
     } = tournament;
 
     if (finished) {
-      success(
-        res,
-        "The tournament's finished, there are no matches left to compete"
-      );
+      return success(res, 'The tournament\'s finished, there are no matches left to compete');
     }
 
     const matches = await getMatches({ winners_bracket, recovered_bracket_1, recovered_bracket_2 });
 
     success(res, matches);
   } catch (err) {
-    error(res, err.message, 500);
+    return error(res, err.message, 500);
   }
 };
 
@@ -117,6 +122,51 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
     success(res, updated_tournament);
   } catch (err) {
     error(res, err.message);
+  }
+};
+
+// Get rankings for a specific tournament
+export const get_tournament_ranking: RequestHandler = async (req, res) => {
+  try {
+    const tournament_id = req.params.tournament_id;
+    const tournament = await Tournament.findById(tournament_id)
+      .populate('category')
+      .populate('competition')
+      .populate('athletes')
+      .populate({
+        path: 'winners_bracket',
+        model: 'Match',
+      })
+      .populate({
+        path: 'recovered_bracket_1',
+        model: 'Match',
+      })
+      .populate({
+        path: 'recovered_bracket_2',
+        model: 'Match',
+      });
+    if (!tournament) throw new Error('No tournament found');
+
+    const {
+      winners_bracket,
+      finished,
+      recovered_bracket_1,
+      recovered_bracket_2,
+    } = tournament;
+
+    if (!finished) {
+      return fail(res, 'Il torneo non è ancora finito, impossibile generare la classifica');
+    }
+
+    const final_rankings = {};
+
+    const final_match = winners_bracket[winners_bracket.length - 1][0];
+    const { winner_athlete, white_athlete, red_athlete } = final_match;
+    const loser_athlete = winner_athlete.toString() === white_athlete.toString() ? red_athlete : white_athlete;
+
+    return success(res, final_rankings);
+  } catch (err) {
+    return error(res, err.message, 500);
   }
 };
 
