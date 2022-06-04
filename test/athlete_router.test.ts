@@ -19,7 +19,11 @@ const category_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_2 = new mongoose.Types.ObjectId();
 
+const unauth_competition_id = new mongoose.Types.ObjectId();
+const unauth_athlete_id = new mongoose.Types.ObjectId();
+
 const athlete_1_route = `http://localhost:2500/api/v2/athletes/${athlete_id_1}`;
+const unauth_athlete_route = `http://localhost:2500/api/v2/athletes/${unauth_athlete_id}`;
 
 const age_classes: AgeClassInterface[] = [
   {
@@ -68,6 +72,17 @@ const athletes: AthleteInterface[] = [
     weight: 47,
     birth_year: 2011,
     category: category_id_1
+  },
+  { // belongs to some other competition
+    _id: unauth_athlete_id,
+    name: 'Teresa',
+    surname: 'Gialli',
+    competition: unauth_competition_id,
+    club: 'Judo Verona',
+    gender: 'F',
+    weight: 41,
+    birth_year: 2012,
+    category: new mongoose.Types.ObjectId()
   }
 ];
 
@@ -367,4 +382,30 @@ test(`POST ${athlete_1_route} with invalid data should should return the fail st
     expect(json_res.status).toBe('fail');
     expect(res.status).toBe(400);
   }
+});
+
+test(`POST ${unauth_athlete_route} should fail and return the unauthorized status`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Teresina',
+  };
+
+  const res = await node_fetch(unauth_athlete_route, {
+    method: 'PUT',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization
+    }
+  });
+
+  expect(res.status).toBe(403);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
 });
