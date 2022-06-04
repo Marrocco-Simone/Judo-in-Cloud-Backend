@@ -463,3 +463,34 @@ test(`POST ${invalid_athlete_route} should fail and return the bad request statu
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
+
+test(`POST ${athlete_1_route} should fail since the age class is closed and return the bad request status`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  // close the age class
+  await AgeClass.findByIdAndUpdate(age_class_id_1, { closed: true });
+
+  const req_body = {
+    name: 'Mirco',
+    surname: 'testi',
+    weight: 49
+  };
+
+  const res = await node_fetch(athlete_1_route, {
+    method: 'PUT',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization
+    }
+  });
+
+  expect(res.status).toBe(400);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
+});

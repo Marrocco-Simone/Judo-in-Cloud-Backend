@@ -156,6 +156,7 @@ export const update_athlete: RequestHandler = async (req, res) => {
     await athlete.save();
     success(res, athlete, 200);
   } catch (err) {
+    console.error({ err });
     error(res, err.message, 500);
   }
 };
