@@ -123,55 +123,67 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
 async function getMatches({ winners_bracket, recovered_bracket_1, recovered_bracket_2 }) {
   const matches = [];
 
-  for (let r = 0; r < winners_bracket.length; r++) {
-    const round = winners_bracket[r];
-    if (!round) continue;
+  for (let r = 0; r < winners_bracket.length - 1; r++) {
+    const winners_round = winners_bracket[r];
+    if (!winners_round) continue;
 
-    for (const match_id of round) {
-      if (!match_id) continue;
-      const match = await Match.findById(match_id);
-      if (!match) {
-        throw new Error(
-          "Found match_id which doesn't reference an existing match"
-        );
-      }
-
-      matches.push(match);
-    }
+    const winners_round_matches = await getMatchesFromRound({ round: winners_round });
+    matches.push(...winners_round_matches);
 
     if (r === 0) continue;
 
-    const recovered_round_1 = recovered_bracket_1[r-1];
-    const recovered_round_2 = recovered_bracket_2[r-1];
+    const recovered_round_1 = recovered_bracket_1[r - 1];
+    const recovered_round_2 = recovered_bracket_2[r - 1];
 
     if (recovered_round_1) {
-      for (const match_id of recovered_round_1) {
-        if (!match_id) continue;
-        const match = await Match.findById(match_id);
-        if (!match) {
-          throw new Error(
-            "Found match_id which doesn't reference an existing match"
-          );
-        }
-
-        matches.push(match);
-      }
+      const recovered_round_1_matches = await getMatchesFromRound({ round: recovered_round_1 });
+      matches.push(...recovered_round_1_matches);
     }
 
     if (recovered_round_2) {
-      for (const match_id of recovered_round_2) {
-        if (!match_id) continue;
-        const match = await Match.findById(match_id);
-        if (!match) {
-          throw new Error(
-            "Found match_id which doesn't reference an existing match"
-          );
-        }
-
-        matches.push(match);
-      }
+      const recovered_round_2_matches = await getMatchesFromRound({ round: recovered_round_2 });
+      matches.push(...recovered_round_2_matches);
     }
   }
 
+  const final_index = winners_bracket.length - 1;
+
+  const recovered_round_1 = recovered_bracket_1[final_index - 1];
+  const recovered_round_2 = recovered_bracket_2[final_index - 1];
+  const winners_round = winners_bracket[final_index];
+
+  if (recovered_round_1) {
+    const recovered_round_1_matches = await getMatchesFromRound({ round: recovered_round_1 });
+    matches.push(...recovered_round_1_matches);
+  }
+
+  if (recovered_round_2) {
+    const recovered_round_2_matches = await getMatchesFromRound({ round: recovered_round_2 });
+    matches.push(...recovered_round_2_matches);
+  }
+
+  if (winners_round) {
+    const winners_round_matches = await getMatchesFromRound({ round: winners_round });
+    matches.push(...winners_round_matches);
+  }
+
   return matches;
+}
+
+async function getMatchesFromRound({ round }) {
+  const round_matches = [];
+
+  for (const match_id of round) {
+    if (!match_id) continue;
+    const match = await Match.findById(match_id);
+    if (!match) {
+      throw new Error(
+        "Found match_id which doesn't reference an existing match"
+      );
+    }
+
+    round_matches.push(match);
+  }
+
+  return round_matches;
 }
