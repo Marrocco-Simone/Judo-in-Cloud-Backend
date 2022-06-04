@@ -24,6 +24,7 @@ const unauth_athlete_id = new mongoose.Types.ObjectId();
 
 const athlete_1_route = `http://localhost:2500/api/v2/athletes/${athlete_id_1}`;
 const unauth_athlete_route = `http://localhost:2500/api/v2/athletes/${unauth_athlete_id}`;
+const nonexistent_athlete_route = `http://localhost:2500/api/v2/athletes/${new mongoose.Types.ObjectId()}`;
 
 const age_classes: AgeClassInterface[] = [
   {
@@ -403,6 +404,32 @@ test(`POST ${unauth_athlete_route} should fail and return the unauthorized statu
   });
 
   expect(res.status).toBe(403);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
+});
+
+test(`POST ${nonexistent_athlete_route} should fail and return the not found status`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Foobar',
+  };
+
+  const res = await node_fetch(nonexistent_athlete_route, {
+    method: 'PUT',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization
+    }
+  });
+
+  expect(res.status).toBe(404);
 
   const json_res = await res.json();
 
