@@ -177,12 +177,14 @@ export const get_tournament_ranking: RequestHandler = async (req, res) => {
       ({ winner_athlete: third_place_2, loser_athlete: fifth_place_2 } = getMatchWinner({ match: recovered_final_2 }));
     }
 
-    const final_rankings = {
-      first_place,
-      second_place,
-      third_places: [third_place_1, third_place_2].filter(Boolean),
-      fifth_places: [fifth_place_1, fifth_place_2].filter(Boolean)
-    };
+    const final_rankings = [
+      { place: 1, athlete: first_place },
+      { place: 2, athlete: second_place },
+      { place: 3, athlete: third_place_1 },
+      { place: 3, athlete: third_place_2 },
+      { place: 5, athlete: fifth_place_1 },
+      { place: 5, athlete: fifth_place_2 }
+    ].filter(r => r.athlete);
 
     return success(res, final_rankings);
   } catch (err) {
