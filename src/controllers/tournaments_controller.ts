@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import mongoose from 'mongoose';
 import { Match, Tournament } from '../schemas';
+import { MatchInterface } from '../schemas/Match';
 import { error, fail, success } from './base_controller';
 
 export const get_tournament: RequestHandler = async (req, res) => {
@@ -158,11 +159,30 @@ export const get_tournament_ranking: RequestHandler = async (req, res) => {
       return fail(res, 'Il torneo non è ancora finito, impossibile generare la classifica');
     }
 
-    const final_rankings = {};
+    const final_match = winners_bracket[winners_bracket.length - 1][0] as MatchInterface;
+    const { winner_athlete: first_place, loser_athlete: second_place } = getMatchWinner({ match: final_match });
 
-    const final_match = winners_bracket[winners_bracket.length - 1][0];
-    const { winner_athlete, white_athlete, red_athlete } = final_match;
-    const loser_athlete = winner_athlete.toString() === white_athlete.toString() ? red_athlete : white_athlete;
+    let third_place_1;
+    let third_place_2;
+    let fifth_place_1;
+    let fifth_place_2;
+
+    if (recovered_bracket_1.length > 0) {
+      const recovered_final_1 = recovered_bracket_1[recovered_bracket_1.length - 1][0] as MatchInterface;
+      ({ winner_athlete: third_place_1, loser_athlete: fifth_place_1 } = getMatchWinner({ match: recovered_final_1 }));
+    }
+
+    if (recovered_bracket_2.length > 0) {
+      const recovered_final_2 = recovered_bracket_2[recovered_bracket_2.length - 1][0] as MatchInterface;
+      ({ winner_athlete: third_place_2, loser_athlete: fifth_place_2 } = getMatchWinner({ match: recovered_final_2 }));
+    }
+
+    const final_rankings = {
+      first_place,
+      second_place,
+      third_places: [third_place_1, third_place_2].filter(Boolean),
+      fifth_places: [fifth_place_1, fifth_place_2].filter(Boolean)
+    };
 
     return success(res, final_rankings);
   } catch (err) {
@@ -236,4 +256,11 @@ async function getMatchesFromRound({ round }) {
   }
 
   return round_matches;
+}
+
+function getMatchWinner ({ match }) {
+  const { winner_athlete, white_athlete, red_athlete } = match;
+  const loser_athlete = winner_athlete.toString() === white_athlete.toString() ? red_athlete : white_athlete;
+
+  return { winner_athlete, loser_athlete };
 }
