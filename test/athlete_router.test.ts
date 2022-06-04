@@ -19,6 +19,8 @@ const category_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_2 = new mongoose.Types.ObjectId();
 
+const athlete_1_route = `http://localhost:2500/api/v2/athletes/${athlete_id_1}`;
+
 const age_classes: AgeClassInterface[] = [
   {
     _id: age_class_id_1,
@@ -291,5 +293,49 @@ test(`POST ${athlete_route} should correctly create a new athlete with the right
       birth_year: 2012
     },
     status: 'success'
+  });
+});
+
+test(`POST ${athlete_1_route} should correctly update the athlete and return the updated model`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const req_body = {
+    name: 'Mirco',
+    surname: 'Bianchi',
+    club: 'Judo Lavis',
+    gender: 'M',
+    weight: 46,
+    birth_year: 2011
+  };
+
+  const res = await node_fetch(athlete_1_route, {
+    method: 'PUT',
+    body: JSON.stringify(req_body),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization
+    }
+  });
+
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'success',
+    data: {
+      _id: athlete_id_1.toString(),
+      __v: 0,
+      name: 'Mirco',
+      surname: 'Bianchi',
+      club: 'Judo Lavis',
+      competition: competition_id.toString(),
+      gender: 'M',
+      weight: 46,
+      birth_year: 2011,
+      category: category_id_1.toString(),
+    }
   });
 });
