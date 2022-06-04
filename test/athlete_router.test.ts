@@ -512,6 +512,24 @@ test(`DELETE ${athlete_1_route} should succeed`, async () => {
   expect(athlete).toBeNull();
 });
 
+test(`DELETE ${unauth_athlete_route} should fail with status 403 unauthorized`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(unauth_athlete_route, {
+    method: 'DELETE',
+    headers: { authorization }
+  });
+
+  expect(res.status).toBe(403);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
+});
+
 test(`DELETE ${nonexistent_athlete_route} should fail with status 404 not found`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
