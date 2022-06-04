@@ -2,7 +2,7 @@ import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete, AthleteInterface } from '../schemas/Athlete';
 import { Types } from 'mongoose';
-import { Tournament } from '../schemas';
+import { AgeClass, Tournament } from '../schemas';
 import { RequestHandler } from 'express';
 
 // Getting all
@@ -115,6 +115,12 @@ export const create_athlete: RequestHandler = async (req, res) => {
         body.gender
       ),
     });
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if(new_athlete_ageclass.closed){
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
+
     const new_athlete = await athlete.save();
     success(res, new_athlete);
   } catch (err) {
@@ -153,6 +159,12 @@ export const update_athlete: RequestHandler = async (req, res) => {
         body.gender
       );
     }
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if(new_athlete_ageclass.closed){
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
+
     await athlete.save();
     success(res, athlete, 200);
   } catch (err) {
@@ -168,7 +180,11 @@ export const delete_athlete: RequestHandler = async (req, res) => {
     const id = new Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
     if (!athlete) return fail(res, 'Athlete not found', 404);
-
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if(new_athlete_ageclass.closed){
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
     await athlete.remove();
     success(res, athlete, 200);
   } catch (err) {
