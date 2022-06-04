@@ -10,7 +10,7 @@ info:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
 host: "localhost:2500"
-basePath: "/api/v2"
+basePath: "/api/v1"
 tags:
 - name: "Login"
   description: "API referred to login"
@@ -321,7 +321,7 @@ paths:
           description: "Age class not found"
         "500":
           description: "Intrnal error"
-  /reopen/{age_class}:
+  /age_classes/reopen/{age_class}:
     get:
       tags:
         - "Age class"
@@ -458,7 +458,7 @@ paths:
 
   # Competition documentation
 
-  /find/{slug}:
+  /competition/find/{slug}:
     get:
       tags:
         - "Competition"
@@ -480,7 +480,7 @@ paths:
         "500":
           description: "Internal error"
         
-  /{competition_id}/tournaments:
+  /competition/{competition_id}/tournaments:
     get:
       tags:
         - "Competition"
@@ -504,19 +504,8 @@ paths:
         "500":
           description: "Internal error"
   
-  /competition/{match_id}:
-    delete:
-      tags:
-        - "Competition"
-      summary: "Delete everything referred to a match"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "path"
-          name: "match_id"
-          description: "The ID of the match to be deleted"
-      
-      responses:
+  
+
         
 
   # Tournament documentation
