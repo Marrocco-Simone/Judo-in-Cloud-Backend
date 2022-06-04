@@ -115,6 +115,8 @@ export const create_athlete: RequestHandler = async (req, res) => {
         body.gender
       ),
     });
+    
+
     const new_athlete = await athlete.save();
     success(res, new_athlete);
   } catch (err) {
