@@ -124,7 +124,7 @@ export const create_athlete: RequestHandler = async (req, res) => {
 
 // Modify an athlete
 /* API V2 */
-export const update_athlete = async (req, res) => {
+export const update_athlete: RequestHandler = async (req, res) => {
   try {
     const id = new Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);

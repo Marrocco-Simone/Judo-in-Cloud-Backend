@@ -339,3 +339,32 @@ test(`POST ${athlete_1_route} should correctly update the athlete and return the
     }
   });
 });
+
+test(`POST ${athlete_1_route} with invalid data should should return the fail status`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const invalid_bodies = [
+    { gender: 'Z' },
+    { weight: 'foo' },
+    { year: 'foo' },
+  ];
+
+  for (const body of invalid_bodies) {
+    const res = await node_fetch(athlete_1_route, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        authorization
+      }
+    });
+
+    const json_res = await res.json();
+
+    expect(json_res).toHaveProperty('message');
+    expect(json_res.status).toBe('fail');
+    expect(res.status).toBe(400);
+  }
+});
