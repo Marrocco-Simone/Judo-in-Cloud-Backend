@@ -547,3 +547,21 @@ test(`DELETE ${nonexistent_athlete_route} should fail with status 404 not found`
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
+
+test(`DELETE ${invalid_athlete_route} should fail with status 400 bad request`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(invalid_athlete_route, {
+    method: 'DELETE',
+    headers: { authorization }
+  });
+
+  expect(res.status).toBe(400);
+
+  const json_res = await res.json();
+
+  expect(json_res.status).toBe('fail');
+  expect(json_res).toHaveProperty('message');
+});
