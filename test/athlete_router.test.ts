@@ -21,11 +21,12 @@ const athlete_id_2 = new mongoose.Types.ObjectId();
 
 const unauth_competition_id = new mongoose.Types.ObjectId();
 const unauth_athlete_id = new mongoose.Types.ObjectId();
+const unauth_category_id = new mongoose.Types.ObjectId();
 
 const athlete_1_route = `http://localhost:2500/api/v2/athletes/${athlete_id_1}`;
 const unauth_athlete_route = `http://localhost:2500/api/v2/athletes/${unauth_athlete_id}`;
 const nonexistent_athlete_route = `http://localhost:2500/api/v2/athletes/${new mongoose.Types.ObjectId()}`;
-const invalid_athlete_route = 'http://localhost:2500/api/v2/athletes/invalidobjid';
+const invalid_athlete_route = 'http://localhost:2500/api/v2/athletes/123';
 
 const age_classes: AgeClassInterface[] = [
   {
@@ -84,7 +85,7 @@ const athletes: AthleteInterface[] = [
     gender: 'F',
     weight: 41,
     birth_year: 2012,
-    category: new mongoose.Types.ObjectId()
+    category: unauth_category_id
   }
 ];
 
@@ -158,7 +159,6 @@ test(`GET ${athlete_route} should give back all the athletes with a valid jwt`, 
   });
 
   const json_res = await res.json();
-
   expect(json_res).toEqual({
     data: [
       {
@@ -313,7 +313,7 @@ test(`POST ${athlete_route} should correctly create a new athlete with the right
   });
 });
 
-test(`POST ${athlete_1_route} should correctly update the athlete and return the updated model`, async () => {
+test(`PUT ${athlete_1_route} should correctly update the athlete and return the updated model`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -335,10 +335,11 @@ test(`POST ${athlete_1_route} should correctly update the athlete and return the
       authorization
     }
   });
-
-  expect(res.status).toBe(200);
-
   const json_res = await res.json();
+  
+  
+  
+  expect(res.status).toBe(200);
 
   expect(json_res).toEqual({
     status: 'success',
@@ -357,7 +358,7 @@ test(`POST ${athlete_1_route} should correctly update the athlete and return the
   });
 });
 
-test(`POST ${athlete_1_route} with invalid data should should return the fail status`, async () => {
+test(`PUT ${athlete_1_route} with invalid data should should return the fail status`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -386,7 +387,7 @@ test(`POST ${athlete_1_route} with invalid data should should return the fail st
   }
 });
 
-test(`POST ${unauth_athlete_route} should fail and return the unauthorized status`, async () => {
+test(`PUT ${unauth_athlete_route} should fail and return the unauthorized status`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -403,16 +404,16 @@ test(`POST ${unauth_athlete_route} should fail and return the unauthorized statu
       authorization
     }
   });
-
+  const json_res = await res.json();
   expect(res.status).toBe(403);
 
-  const json_res = await res.json();
+  
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
 
-test(`POST ${nonexistent_athlete_route} should fail and return the not found status`, async () => {
+test(`PUT ${nonexistent_athlete_route} should fail and return the not found status`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -438,7 +439,7 @@ test(`POST ${nonexistent_athlete_route} should fail and return the not found sta
   expect(json_res).toHaveProperty('message');
 });
 
-test(`POST ${invalid_athlete_route} should fail and return the bad request status`, async () => {
+test(`PUT ${invalid_athlete_route} should fail and return the bad request status`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -456,15 +457,16 @@ test(`POST ${invalid_athlete_route} should fail and return the bad request statu
     }
   });
 
+  const json_res = await res.json();
   expect(res.status).toBe(400);
 
-  const json_res = await res.json();
+  
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
 
-test(`POST ${athlete_1_route} should fail since the age class is closed and return the bad request status`, async () => {
+test(`PUT ${athlete_1_route} should fail since the age class is closed and return the bad request status`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const authorization = `Bearer ${access_jwt}`;
@@ -475,7 +477,7 @@ test(`POST ${athlete_1_route} should fail since the age class is closed and retu
   const req_body = {
     name: 'Mirco',
     surname: 'testi',
-    weight: 49
+    weight: 49,
   };
 
   const res = await node_fetch(athlete_1_route, {
@@ -486,10 +488,11 @@ test(`POST ${athlete_1_route} should fail since the age class is closed and retu
       authorization
     }
   });
-
-  expect(res.status).toBe(400);
-
   const json_res = await res.json();
+  expect(res.status).toBe(400);
+  
+  
+
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
@@ -504,6 +507,8 @@ test(`DELETE ${athlete_1_route} should succeed`, async () => {
     method: 'DELETE',
     headers: { authorization }
   });
+
+  const json_res = await res.json();
 
   expect(res.status).toBe(200);
 
@@ -521,10 +526,8 @@ test(`DELETE ${unauth_athlete_route} should fail with status 403 unauthorized`, 
     method: 'DELETE',
     headers: { authorization }
   });
-
-  expect(res.status).toBe(403);
-
   const json_res = await res.json();
+  expect(res.status).toBe(403);
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
