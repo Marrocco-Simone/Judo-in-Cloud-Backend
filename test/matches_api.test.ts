@@ -27,6 +27,7 @@ const age_class_id = new mongoose.Types.ObjectId();
 const category_id = new mongoose.Types.ObjectId();
 
 const match_1_route = `http://localhost:2500/api/v1/matches/${match_1_id}`;
+const nonexistent_match_route = `http://localhost:2500/api/v1/matches/${new mongoose.Types.ObjectId()}`;
 
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
@@ -160,4 +161,18 @@ test(`GET ${match_1_route} should return the match information`, async () => {
       },
     },
   });
+});
+
+test(`GET ${nonexistent_match_route} on non existing match should fail and return 404 not found`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: 3600 * 24,
+  });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(nonexistent_match_route, {
+    headers: { authorization },
+    method: 'GET',
+  });
+  expect(res.status).toBe(404);
 });
