@@ -524,8 +524,25 @@ paths:
       responses:
         "200":
           description: "True if the age class can be reopen, false otherwise"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data:
+                type: object
+                properties: 
+                  can_reopen:
+                    example: true
         "400":
           description: "Age class not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Age Class not found"
         "500":
           description: "Internal error"
     post:
@@ -546,8 +563,17 @@ paths:
       responses:
         "200":
           description: "Age class reopen"
+          schema:
+            $ref: '#/definitions/Age Class'
         "400":
           description: "Age class not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Age Class not found"
         "500":
           description: "Internal error"
         
