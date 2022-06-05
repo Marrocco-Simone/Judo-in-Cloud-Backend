@@ -111,3 +111,29 @@ test(`POST ${invalid_tour_reserve_route} should fail with status 400 since the i
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
+
+test(`POST ${tour_reserve_route} without passing a valid tatami number should fail with status 400`, async () => {
+  const invalid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(invalid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const invalid_bodies = [
+    { tatami_number: -1 },
+    { tatami_number: null },
+    { tatami_number: 'foo' },
+    { },
+  ];
+
+  for (const body of invalid_bodies) {
+    const res = await node_fetch(tour_reserve_route, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { authorization, 'Content-Type': 'application/json' },
+    });
+    expect(res.status).toBe(400);
+
+    const json_res = await res.json();
+    expect(json_res.status).toBe('fail');
+    expect(json_res).toHaveProperty('message');
+  }
+});
