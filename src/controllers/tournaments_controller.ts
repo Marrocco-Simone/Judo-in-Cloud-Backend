@@ -105,8 +105,12 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
     if (!mongoose.isValidObjectId(id)) {
       return fail(res, 'Tournament id is not valid');
     }
-    if (typeof (req.body.tatami_number) === 'undefined') {
-      return fail(res, 'You must pass a tatami number');
+    if (req.body.tatami_number === undefined) {
+      return fail(res, 'Devi indicare un numero tatami');
+    }
+    const tatami_number = parseInt(req.body.tatami_number, 10);
+    if (isNaN(tatami_number) || tatami_number < 1) {
+      return fail(res, 'Numero tatami non valido');
     }
     const update_tournament = await Tournament.findById(id);
     if (update_tournament === null) {
