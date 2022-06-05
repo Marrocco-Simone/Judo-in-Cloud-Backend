@@ -597,8 +597,22 @@ paths:
       responses:
         "200":
           description: "Match Data"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data:
+                $ref: '#/definitions/Match'
         "404":
           description: "Match not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Match not found"
         "500":
           description: "Internal error"
     post:
@@ -621,7 +635,7 @@ paths:
         - in: body
           name: "Parameters"
           description: "Data you want to update"
-          required: false # ???????????????????????????????????????????????????
+          required: true
           schema:
             type: "object"
             properties: 
@@ -664,8 +678,119 @@ paths:
       responses:
         "200":
           description: "Match updated"
+          schema:
+            type: object
+            properties:
+              status: 
+                example: "success"
+              data:
+                type: object
+                properties:
+                  match_scores:
+                    type: object
+                    properties:
+                      final_time:
+                        example: 200
+                      white_ippon:
+                        example: 0
+                      white_wazaari:
+                        example: 1
+                      white_penalties:
+                        example: 1
+                      red_ippon:
+                        example: 1
+                      red_wazaari:
+                        example: 1
+                      red_penalties:
+                        example: 2
+                  _id:
+                    example: "629cf0df69921e63f81d4a68"
+                  is_over:
+                    example: false
+                  is_started:
+                    example: false
+                  loser_recovered:
+                    example: false
+                  match_type:
+                    example: 0
+                  red_athlete:
+                    type: object
+                    properties:
+                      _id:
+                        example: "629cd68208de44af914aa35d"
+                      name:
+                        example: "Elia"
+                      surname:
+                        example: "Colombo"
+                      competition:
+                        example: "629cd68208de44af914aa343"
+                      club:
+                        example: "Judo Lecce"
+                      gender:
+                        example: "M"
+                      weight:
+                        example: 59
+                      birth_year:
+                        example: 1970
+                      category:
+                        example: "629cd68208de44af914aa34c"
+                      __v:
+                        example: 0
+                  tournament:
+                    example: "629cf0df69921e63f81d4a66"
+                  white_athlete:
+                    type: object
+                    properties: 
+                      _id:
+                        example: "629285f5d68e8d007ea3d726"
+                      name:
+                        example: "Kevin"
+                      surname:
+                        example: "Rossi"
+                      competition:
+                        example: "629cd68208de44af914aa343"
+                      club:
+                        example: "Judo Padova"
+                      gender:
+                        example: "M"
+                      weight:
+                        example: 59
+                      birth_year:
+                        example: 1970
+                      category:
+                        example: "629cd68208de44af914aa34c"
+                      __v:
+                        example: 0
+                  
+                  winner_athlete:
+                        example: "629285f5d68e8d007ea3d726"
+                  params:
+                    type: object
+                    properties: 
+                      match_time:
+                        example: 120
+                      supplemental_match_time:
+                        example: 120
+                      ippon_to_win:
+                        example: 1
+                      wazaari_to_win:
+                        example: 2
+                      ippon_timer:
+                        example: 20
+                      wazaari_timer::
+                        example: 10
+                  category_name:
+                    example: "Esordienti B U60 M"
+              
         "404":
           description: "Match not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Match not found"
         "500":
           description: "Internal error"
 
