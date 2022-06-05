@@ -20,6 +20,7 @@ let server: Server;
 const user_id_1 = new mongoose.Types.ObjectId();
 const competition_id = new mongoose.Types.ObjectId();
 const match_1_id = new mongoose.Types.ObjectId();
+const match_2_id = new mongoose.Types.ObjectId();
 const athlete_1_id = new mongoose.Types.ObjectId();
 const athlete_2_id = new mongoose.Types.ObjectId();
 const tournament_id = new mongoose.Types.ObjectId();
@@ -27,6 +28,7 @@ const age_class_id = new mongoose.Types.ObjectId();
 const category_id = new mongoose.Types.ObjectId();
 
 const match_1_route = `http://localhost:2500/api/v1/matches/${match_1_id}`;
+const match_2_route = `http://localhost:2500/api/v1/matches/${match_2_id}`;
 const nonexistent_match_route = `http://localhost:2500/api/v1/matches/${new mongoose.Types.ObjectId()}`;
 
 beforeAll(async () => {
@@ -102,8 +104,19 @@ beforeEach(async () => {
     match_type: 0,
     loser_recovered: false,
   });
+  const match_2 = new Match({
+    _id: match_2_id,
+    white_athlete: athlete_1._id,
+    red_athlete: athlete_2._id,
+    winner_athlete: null,
+    is_started: false,
+    is_over: false,
+    match_type: 0,
+    loser_recovered: false,
+  });
   await Match.deleteMany({});
   await match.save();
+  await match_2.save();
 });
 
 afterAll(async () => {
@@ -175,4 +188,57 @@ test(`GET ${nonexistent_match_route} on non existing match should fail and retur
     method: 'GET',
   });
   expect(res.status).toBe(404);
+});
+
+test(`POST ${match_2_route} should update the match and return the new data`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: 3600 * 24,
+  });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(match_2_route, {
+    headers: { authorization, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      winner_athlete: athlete_2_id.toString(),
+      is_started: true,
+      is_over: true,
+      match_scores: {
+        final_time: 6,
+        white_ippon: 1,
+        white_wazaari: 0,
+        white_penalties: 2,
+        red_ippon: 0,
+        red_wazaari: 1,
+        red_penalties: 0
+      }
+    }),
+    method: 'POST',
+  });
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+  expect(json_res).toEqual({
+    status: 'success',
+    data: {
+      __v: 0,
+      _id: match_2_id.toString(),
+      is_over: true,
+      is_started: true,
+      loser_recovered: false,
+      match_type: 0,
+      red_athlete: athlete_2_id.toString(),
+      white_athlete: athlete_1_id.toString(),
+      winner_athlete: athlete_2_id.toString(),
+      match_scores: {
+        final_time: 6,
+        white_ippon: 1,
+        white_wazaari: 0,
+        white_penalties: 2,
+        red_ippon: 0,
+        red_wazaari: 1,
+        red_penalties: 0
+      }
+    },
+  });
 });
