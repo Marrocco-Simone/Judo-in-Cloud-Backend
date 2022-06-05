@@ -88,7 +88,6 @@ export const create_athlete: RequestHandler = async (req, res) => {
     birth_year: number;
   } = req.body;
 
-  console.log(req.user);
   if (
     !body.name ||
     !body.surname ||
