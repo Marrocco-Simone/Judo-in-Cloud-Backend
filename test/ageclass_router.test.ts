@@ -25,6 +25,7 @@ const category_id_1 = new mongoose.Types.ObjectId();
 const category_id_2 = new mongoose.Types.ObjectId();
 const category_id_3 = new mongoose.Types.ObjectId();
 const category_id_4 = new mongoose.Types.ObjectId();
+const category_id_5 = new mongoose.Types.ObjectId();
 const athlete_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_2 = new mongoose.Types.ObjectId();
 const athlete_id_3 = new mongoose.Types.ObjectId();
@@ -67,25 +68,31 @@ const categories: CategoryInterface[] = [
     _id: category_id_1,
     age_class: age_class_id_1,
     max_weight: 60,
-    gender: 'M',
+    gender: 'M'
   },
   {
     _id: category_id_2,
     age_class: age_class_id_2,
     max_weight: 50,
-    gender: 'M',
+    gender: 'M'
   },
   {
     _id: category_id_3,
     age_class: age_class_id_1,
     max_weight: 55,
-    gender: 'F',
+    gender: 'F'
   },
   {
     _id: category_id_4,
     age_class: age_class_id_1,
     max_weight: 50,
-    gender: 'M',
+    gender: 'M'
+  },
+  {
+    _id: category_id_5,
+    age_class: age_class_id_2,
+    max_weight: 50,
+    gender: 'F'
   }
 ];
 const athletes: AthleteInterface[] = [
@@ -270,6 +277,13 @@ test(`GET ${age_class_route_v1} should give back all the age classes with a vali
             max_weight: '50',
             gender: 'M',
           },
+          {
+            __v: 0,
+            _id: category_id_5.toString(),
+            age_class: age_class_id_2.toString(),
+            max_weight: '50',
+            gender: 'F'
+          }
         ],
         closed: false,
         competition: competition_id_1.toString(),
