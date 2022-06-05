@@ -459,8 +459,50 @@ paths:
       responses:
         "200":
           description: "Age class modified"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data:
+                type: object
+                properties: 
+                  params:
+                    type: object
+                    properties: 
+                      match_time:
+                        example: 120
+                      supplemental_match_time:
+                        example: 120
+                      ippon_to_win:
+                        example:  1
+                      wazaari_to_win:
+                        example:  2
+                      ippon_timer:
+                        example:  20
+                      wazaari_timer:
+                        example:  10
+                  _id:
+                    example: "6286acd6ead4f64e204a6e06"
+                  max_age:
+                    example: 15,
+                  competition:
+                    example: "6286acd6ead4f64e204a6e01"
+                  name:
+                    example: "Esordienti B"
+                  __v:
+                    example: 0
+                  closed:
+                    example: true
         "404":
           description: "Age class not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Age Class not found"
         "500":
           description: "Intrnal error"
   /age_classes/reopen/{age_class}:
