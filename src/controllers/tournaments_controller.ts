@@ -100,21 +100,28 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
 /* API V2 */
 // Reserve a tournament
 export const reserve_tournament: RequestHandler = async (req, res) => {
+  const user = req.user;
+  const competition = user.competition;
+  const id = req.params.tournament_id;
+
+  if (!mongoose.isValidObjectId(id)) {
+    return fail(res, 'Tournament id is not valid');
+  }
+  if (req.body.tatami_number === undefined) {
+    return fail(res, 'Devi indicare un numero tatami');
+  }
+  const tatami_number = parseInt(req.body.tatami_number, 10);
+  if (isNaN(tatami_number) || tatami_number < 1) {
+    return fail(res, 'Numero tatami non valido');
+  }
+
   try {
-    const id = req.params.tournament_id;
-    if (!mongoose.isValidObjectId(id)) {
-      return fail(res, 'Tournament id is not valid');
-    }
-    if (req.body.tatami_number === undefined) {
-      return fail(res, 'Devi indicare un numero tatami');
-    }
-    const tatami_number = parseInt(req.body.tatami_number, 10);
-    if (isNaN(tatami_number) || tatami_number < 1) {
-      return fail(res, 'Numero tatami non valido');
-    }
     const update_tournament = await Tournament.findById(id);
     if (update_tournament === null) {
       return fail(res, 'Tournament not found', 404);
+    }
+    if (!update_tournament.competition.equals(competition._id)) {
+      return fail(res, 'Non puoi eseguire questa operazione', 403);
     }
     update_tournament.tatami_number = req.body.tatami_number;
     const updated_tournament = await update_tournament.save();

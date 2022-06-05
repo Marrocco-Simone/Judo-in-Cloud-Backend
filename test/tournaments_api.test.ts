@@ -55,7 +55,7 @@ beforeEach(async () => {
   });
   const unauth_tournament = new Tournament({
     _id: unauth_tournament_id,
-    competition: competition_id,
+    competition: new mongoose.Types.ObjectId(),
     category: new mongoose.Types.ObjectId(),
     tatami_number: null,
     finished: false,
