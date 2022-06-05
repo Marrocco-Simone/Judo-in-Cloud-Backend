@@ -204,6 +204,8 @@ afterAll(async () => {
 test(`GET ${age_class_route_v1} should give back unauthorized error if there is no jwt`, async () => {
   const res = await node_fetch(age_class_route_v1);
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -222,6 +224,8 @@ test(`GET ${age_class_route_v1} should give back all the age classes with a vali
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -306,6 +310,8 @@ test(`GET ${age_class_route_v1} should give back all the age classes with a vali
 test(`GET ${age_class_route_v1}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
   const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`);
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -326,6 +332,8 @@ test(`GET ${age_class_route_v1}/:age_class_id should give back an error if there
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(404);
 
   const json_res = await res.json();
 
@@ -348,6 +356,8 @@ test(`GET ${age_class_route_v1}/:age_class_id should give back an error if the a
     }
   });
 
+  expect(res.status).toBe(500);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -366,6 +376,8 @@ test(`GET ${age_class_route_v1}/:age_class_id should give back the specific age 
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -395,6 +407,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back unauthorized err
     method: 'POST'
   });
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -417,6 +431,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if ther
     }
   });
 
+  expect(res.status).toBe(404);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -438,6 +454,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the 
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(500);
 
   const json_res = await res.json();
 
@@ -472,6 +490,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the 
     }
   });
 
+  expect(res.status).toBe(500);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -502,6 +522,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the 
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
@@ -535,6 +557,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should update the age class with 
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -576,6 +600,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should close the age class with t
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -630,6 +656,8 @@ test(`POST ${age_class_route_v1}/:age_class_id should close the age class with t
 test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
   const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_1.toString()}`);
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -650,6 +678,8 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error i
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
@@ -672,11 +702,34 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error i
     }
   });
 
+  expect(res.status).toBe(500);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
     message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
     status: 'error'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error if the authenticated user is in another competition from the one of the age class`, async () => {
+  const valid_user = { _id: user_id_2, username: 'validUserForSecondCompetition' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_2.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(403);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'This user is registered for another competition',
+    status: 'fail'
   });
 });
 
@@ -690,6 +743,8 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = 
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -798,6 +853,8 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = 
     }
   });
 
+  expect(res.status).toBe(200);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -904,6 +961,8 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = 
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
