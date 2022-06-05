@@ -27,7 +27,7 @@ export const get_age_classes: RequestHandler = async (req, res) => {
     success(res, age_classes_result);
   } catch (e) {
     console.log(e);
-    error(res, e.message);
+    return error(res, e.message);
   }
 };
 
@@ -39,7 +39,7 @@ export const get_age_class: RequestHandler = async (req, res) => {
     success(res, age_class);
   } catch (e) {
     console.log(e);
-    error(res, e.message);
+    return error(res, e.message);
   }
 };
 
