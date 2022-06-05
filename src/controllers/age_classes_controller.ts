@@ -1,4 +1,3 @@
-import express from 'express';
 import { RequestHandler } from 'express';
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
@@ -128,7 +127,7 @@ export const is_age_class_reopenable: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class) return fail(res, 'Age class not found');
     if (!age_class.closed) return success(res, { can_reopen: true });
 
     const category = await Category.find({ age_class: age_class_id });

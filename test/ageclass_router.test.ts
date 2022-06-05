@@ -1,19 +1,24 @@
 import jwt from 'jsonwebtoken';
-import { AgeClass, Athlete, Category, Competition, Tournament, User } from '../src/schemas';
+import { AgeClass, Athlete, Category, Competition, Tournament, User, Match } from '../src/schemas';
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 import { AgeClassInterface } from '../src/schemas/AgeClass';
 import { CategoryInterface } from '../src/schemas/Category';
 import { AthleteInterface } from '../src/schemas/Athlete';
+import { MatchInterface } from '../src/schemas/Match';
+import { UserInterface } from '../src/schemas/User';
+import { CompetitionInterface } from '../src/schemas/Competition';
 
 const { app } = require('../src/bootstrap');
 const node_fetch = require('node-fetch');
 
 let server;
-const age_class_route = 'http://localhost:2500/api/v1/age_classes';
+const age_class_route_v1 = 'http://localhost:2500/api/v1/age_classes';
+const age_class_route_v2 = 'http://localhost:2500/api/v2/age_classes';
 
 const user_id_1 = new mongoose.Types.ObjectId();
-const competition_id = new mongoose.Types.ObjectId();
+const user_id_2 = new mongoose.Types.ObjectId();
+const competition_id_1 = new mongoose.Types.ObjectId();
+const competition_id_2 = new mongoose.Types.ObjectId();
 const age_class_id_1 = new mongoose.Types.ObjectId();
 const age_class_id_2 = new mongoose.Types.ObjectId();
 const category_id_1 = new mongoose.Types.ObjectId();
@@ -22,12 +27,14 @@ const category_id_3 = new mongoose.Types.ObjectId();
 const category_id_4 = new mongoose.Types.ObjectId();
 const athlete_id_1 = new mongoose.Types.ObjectId();
 const athlete_id_2 = new mongoose.Types.ObjectId();
+const athlete_id_3 = new mongoose.Types.ObjectId();
+const athlete_id_4 = new mongoose.Types.ObjectId();
 
 const age_classes: AgeClassInterface[] = [
   {
     _id: age_class_id_1,
     max_age: 15,
-    competition: competition_id,
+    competition: competition_id_1,
     name: 'Giovanissimi',
     closed: false,
     params: {
@@ -42,7 +49,7 @@ const age_classes: AgeClassInterface[] = [
   {
     _id: age_class_id_2,
     max_age: 13,
-    competition: competition_id,
+    competition: competition_id_1,
     name: 'Esordienti',
     closed: false,
     params: {
@@ -86,7 +93,7 @@ const athletes: AthleteInterface[] = [
     _id: athlete_id_1,
     name: 'Marco',
     surname: 'Rossi',
-    competition: competition_id,
+    competition: competition_id_1,
     club: 'Judo Bologna',
     gender: 'M',
     weight: 48,
@@ -97,12 +104,60 @@ const athletes: AthleteInterface[] = [
     _id: athlete_id_2,
     name: 'Daniele',
     surname: 'Bianchi',
-    competition: competition_id,
+    competition: competition_id_1,
     club: 'Judo Treviso',
     gender: 'M',
     weight: 47,
     birth_year: 2011,
     category: category_id_2
+  },
+  {
+    _id: athlete_id_3,
+    name: 'Kenny',
+    surname: 'Rosa',
+    competition: competition_id_1,
+    club: 'Judo Milano',
+    gender: 'M',
+    weight: 46,
+    birth_year: 2011,
+    category: category_id_2
+  },
+  {
+    _id: athlete_id_4,
+    name: 'Davide',
+    surname: 'Bruni',
+    competition: competition_id_1,
+    club: 'Judo Trento',
+    gender: 'M',
+    weight: 48,
+    birth_year: 2010,
+    category: category_id_2
+  }
+];
+const users: UserInterface[] = [
+  {
+    _id: user_id_1,
+    username: 'validUser',
+    password: 'pwd',
+    competition: competition_id_1
+  },
+  {
+    _id: user_id_2,
+    username: 'validUserForSecondCompetition',
+    password: 'pwd2',
+    competition: competition_id_2
+  }
+];
+const competitions: CompetitionInterface[] = [
+  {
+    _id: competition_id_1,
+    name: 'competition',
+    slug: 'comp'
+  },
+  {
+    _id: competition_id_2,
+    name: 'other_competition',
+    slug: 'other_comp'
   }
 ];
 
@@ -114,26 +169,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await Competition.remove({});
-
-  const competition = new Competition({
-    _id: competition_id,
-    name: 'competition'
-  });
-
-  await competition.save();
+  await Competition.insertMany(competitions);
 
   await User.remove({});
-
-  const hash = await bcrypt.hash('pwd', 10);
-
-  const user_to_save = new User({
-    _id: user_id_1,
-    username: 'validUser',
-    password: hash,
-    competition: competition_id
-  });
-
-  await user_to_save.save();
+  await User.insertMany(users);
 
   await AgeClass.remove({});
   await AgeClass.insertMany(age_classes);
@@ -145,6 +184,8 @@ beforeEach(async () => {
   await Athlete.insertMany(athletes);
 
   await Tournament.remove({});
+
+  await Match.remove({});
 });
 
 afterAll(async () => {
@@ -153,8 +194,8 @@ afterAll(async () => {
   server.close();
 });
 
-test(`GET ${age_class_route} should give back unauthorized error if there is no jwt`, async () => {
-  const res = await node_fetch(age_class_route);
+test(`GET ${age_class_route_v1} should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(age_class_route_v1);
 
   const json_res = await res.json();
 
@@ -164,12 +205,12 @@ test(`GET ${age_class_route} should give back unauthorized error if there is no 
   });
 });
 
-test(`GET ${age_class_route} should give back all the age classes with a valid jwt, and fill all the category information inside the array`, async () => {
+test(`GET ${age_class_route_v1} should give back all the age classes with a valid jwt, and fill all the category information inside the array`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
 
-  const res = await node_fetch(age_class_route, {
+  const res = await node_fetch(age_class_route_v1, {
     headers: {
       authorization: access_token
     }
@@ -206,7 +247,7 @@ test(`GET ${age_class_route} should give back all the age classes with a valid j
           }
         ],
         closed: false,
-        competition: competition_id.toString(),
+        competition: competition_id_1.toString(),
         max_age: 15,
         name: 'Giovanissimi',
         params: {
@@ -231,7 +272,7 @@ test(`GET ${age_class_route} should give back all the age classes with a valid j
           },
         ],
         closed: false,
-        competition: competition_id.toString(),
+        competition: competition_id_1.toString(),
         max_age: 13,
         name: 'Esordienti',
         params: {
@@ -248,8 +289,8 @@ test(`GET ${age_class_route} should give back all the age classes with a valid j
   });
 });
 
-test(`GET ${age_class_route}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`);
+test(`GET ${age_class_route_v1}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`);
 
   const json_res = await res.json();
 
@@ -259,14 +300,14 @@ test(`GET ${age_class_route}/:age_class_id should give back unauthorized error i
   });
 });
 
-test(`GET ${age_class_route}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+test(`GET ${age_class_route_v1}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
 
   const age_class_id_3 = new mongoose.Types.ObjectId();
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_3.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_3.toString()}`, {
     headers: {
       authorization: access_token
     }
@@ -280,12 +321,33 @@ test(`GET ${age_class_route}/:age_class_id should give back an error if there is
   });
 });
 
-test(`GET ${age_class_route}/:age_class_id should give back the specific age class with a valid jwt`, async () => {
+test(`GET ${age_class_route_v1}/:age_class_id should give back an error if the age_class linked in the url is not a valid id`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+  const age_class_id_3 = 'an invalid mongodb id';
+
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_3}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
+    status: 'error'
+  });
+});
+
+test(`GET ${age_class_route_v1}/:age_class_id should give back the specific age class with a valid jwt`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`, {
     headers: {
       authorization: access_token
     }
@@ -298,7 +360,7 @@ test(`GET ${age_class_route}/:age_class_id should give back the specific age cla
       __v: 0,
       _id: age_class_id_1.toString(),
       closed: false,
-      competition: competition_id.toString(),
+      competition: competition_id_1.toString(),
       max_age: 15,
       name: 'Giovanissimi',
       params: {
@@ -314,8 +376,8 @@ test(`GET ${age_class_route}/:age_class_id should give back the specific age cla
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+test(`POST ${age_class_route_v1}/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`, {
     method: 'POST'
   });
 
@@ -327,14 +389,14 @@ test(`POST ${age_class_route}/:age_class_id should give back unauthorized error 
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+test(`POST ${age_class_route_v1}/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
 
   const age_class_id_3 = new mongoose.Types.ObjectId();
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_3.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_3.toString()}`, {
     method: 'POST',
     headers: {
       authorization: access_token
@@ -349,7 +411,29 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if there i
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should give back an error if the parameters in the body are not of a valid type`, async () => {
+test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the age_class linked in the url is not a valid id`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = 'an invalid mongodb id';
+
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_3}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
+    status: 'error'
+  });
+});
+
+test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the parameters in the body are not of a valid type`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
@@ -365,7 +449,7 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
     }
   };
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`, {
     method: 'POST',
     body: JSON.stringify(req_body),
     headers: {
@@ -382,7 +466,7 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should give back an error if the parameters in the body are not enough`, async () => {
+test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the parameters in the body are not enough`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
@@ -396,7 +480,7 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
     }
   };
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`, {
     method: 'POST',
     body: JSON.stringify(req_body),
     headers: {
@@ -413,7 +497,7 @@ test(`POST ${age_class_route}/:age_class_id should give back an error if the par
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should update the age class with the parameters in the body, if they are of valid type`, async () => {
+test(`POST ${age_class_route_v1}/:age_class_id should update the age class with the parameters in the body, if they are of valid type`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
@@ -429,7 +513,7 @@ test(`POST ${age_class_route}/:age_class_id should update the age class with the
     }
   };
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_1.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_1.toString()}`, {
     method: 'POST',
     body: JSON.stringify(req_body),
     headers: {
@@ -445,7 +529,7 @@ test(`POST ${age_class_route}/:age_class_id should update the age class with the
       __v: 0,
       _id: age_class_id_1.toString(),
       closed: false,
-      competition: competition_id.toString(),
+      competition: competition_id_1.toString(),
       max_age: 15,
       name: 'Giovanissimi',
       params: {
@@ -461,7 +545,7 @@ test(`POST ${age_class_route}/:age_class_id should update the age class with the
   });
 });
 
-test(`POST ${age_class_route}/:age_class_id should close the age class with the flag in the body, create a new tournament`, async () => {
+test(`POST ${age_class_route_v1}/:age_class_id should close the age class with the flag in the body, create a new tournament`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
   const access_token = `Bearer ${access_jwt}`;
@@ -470,7 +554,7 @@ test(`POST ${age_class_route}/:age_class_id should close the age class with the 
     closed: true
   };
 
-  const res = await node_fetch(`${age_class_route}/${age_class_id_2.toString()}`, {
+  const res = await node_fetch(`${age_class_route_v1}/${age_class_id_2.toString()}`, {
     method: 'POST',
     body: JSON.stringify(req_body),
     headers: {
@@ -486,7 +570,7 @@ test(`POST ${age_class_route}/:age_class_id should close the age class with the 
       __v: 0,
       _id: age_class_id_2.toString(),
       closed: true,
-      competition: competition_id.toString(),
+      competition: competition_id_1.toString(),
       max_age: 13,
       name: 'Esordienti',
       params: {
@@ -517,12 +601,302 @@ test(`POST ${age_class_route}/:age_class_id should close the age class with the 
     athletes: [
       athlete_id_1,
       athlete_id_2,
+      athlete_id_3,
+      athlete_id_4,
     ],
     category: category_id_2,
-    competition: competition_id,
+    competition: competition_id_1,
     finished: false,
     recovered_bracket_1: [],
     recovered_bracket_2: [],
     tatami_number: 0
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_1.toString()}`);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Unauthorized',
+    status: 'fail'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = new mongoose.Types.ObjectId();
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_3.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Age class not found',
+    status: 'fail'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error if the age_class linked in the url is not a valid id`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = 'an invalid mongodb id';
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_3}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
+    status: 'error'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = true if the age_class is not closed`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_1.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      can_reopen: true
+    },
+    status: 'success'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = false if at least one match has been started on the age_class`, async () => {
+  const match_id_1 = new mongoose.Types.ObjectId();
+  const match_id_2 = new mongoose.Types.ObjectId();
+  const tournament_id = new mongoose.Types.ObjectId();
+
+  const matches: MatchInterface[] = [
+    {
+      _id: match_id_1,
+      white_athlete: athlete_id_1,
+      red_athlete: athlete_id_4,
+      winner_athlete: athlete_id_4,
+      tournament: tournament_id,
+      is_started: true,
+      is_over: true,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: 5,
+        white_ippon: 0,
+        white_wazaari: 1,
+        white_penalties: 2,
+        red_ippon: 1,
+        red_wazaari: 0,
+        red_penalties: 0
+      },
+    },
+    {
+      _id: match_id_2,
+      white_athlete: athlete_id_2,
+      red_athlete: athlete_id_3,
+      winner_athlete: null,
+      tournament: tournament_id,
+      is_started: false,
+      is_over: false,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: null,
+        white_ippon: null,
+        white_wazaari: null,
+        white_penalties: null,
+        red_ippon: null,
+        red_wazaari: null,
+        red_penalties: null
+      },
+    }
+  ];
+
+  await Match.insertMany(matches);
+
+  const tournament = new Tournament({
+    _id: tournament_id,
+    competition: competition_id_1,
+    category: category_id_2,
+    tatami_number: 1,
+    finished: false,
+    athletes: [
+      athlete_id_1,
+      athlete_id_2,
+      athlete_id_3,
+      athlete_id_4
+    ],
+    winners_bracket: [
+      [
+        match_id_1,
+        match_id_2
+      ],
+      [
+        null
+      ]
+    ],
+    recovered_bracket_1: [
+      [
+        null
+      ]
+    ],
+    recovered_bracket_2: [
+      [
+        null
+      ]
+    ]
+  });
+
+  await tournament.save();
+
+  await AgeClass.updateOne({ _id: age_class_id_2 }, { $set: { closed: true } });
+
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_2.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      can_reopen: false
+    },
+    status: 'success'
+  });
+});
+
+test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = true if no match has been started on the age_class`, async () => {
+  const match_id_1 = new mongoose.Types.ObjectId();
+  const match_id_2 = new mongoose.Types.ObjectId();
+  const tournament_id = new mongoose.Types.ObjectId();
+
+  const matches: MatchInterface[] = [
+    {
+      _id: match_id_1,
+      white_athlete: athlete_id_1,
+      red_athlete: athlete_id_4,
+      winner_athlete: null,
+      tournament: tournament_id,
+      is_started: false,
+      is_over: false,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: null,
+        white_ippon: null,
+        white_wazaari: null,
+        white_penalties: null,
+        red_ippon: null,
+        red_wazaari: null,
+        red_penalties: null
+      },
+    },
+    {
+      _id: match_id_2,
+      white_athlete: athlete_id_2,
+      red_athlete: athlete_id_3,
+      winner_athlete: null,
+      tournament: tournament_id,
+      is_started: false,
+      is_over: false,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: null,
+        white_ippon: null,
+        white_wazaari: null,
+        white_penalties: null,
+        red_ippon: null,
+        red_wazaari: null,
+        red_penalties: null
+      },
+    }
+  ];
+
+  await Match.insertMany(matches);
+
+  const tournament = new Tournament({
+    _id: tournament_id,
+    competition: competition_id_1,
+    category: category_id_2,
+    tatami_number: 1,
+    finished: false,
+    athletes: [
+      athlete_id_1,
+      athlete_id_2,
+      athlete_id_3,
+      athlete_id_4
+    ],
+    winners_bracket: [
+      [
+        match_id_1,
+        match_id_2
+      ],
+      [
+        null
+      ]
+    ],
+    recovered_bracket_1: [
+      [
+        null
+      ]
+    ],
+    recovered_bracket_2: [
+      [
+        null
+      ]
+    ]
+  });
+
+  await tournament.save();
+
+  await AgeClass.updateOne({ _id: age_class_id_2 }, { $set: { closed: true } });
+
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_2.toString()}`, {
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      can_reopen: true
+    },
+    status: 'success'
   });
 });
