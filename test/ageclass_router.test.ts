@@ -679,7 +679,7 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error i
     }
   });
 
-  expect(res.status).toBe(400);
+  expect(res.status).toBe(404);
 
   const json_res = await res.json();
 

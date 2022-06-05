@@ -127,7 +127,7 @@ export const is_age_class_reopenable: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age class not found');
+    if (!age_class) return fail(res, 'Age class not found', 404);
 
     const { competition: user_competition } = req.user;
     if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'This user is registered for another competition', 403);
@@ -166,7 +166,7 @@ export const reopen_age_class: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age Class not found');
+    if (!age_class) return fail(res, 'Age Class not found', 404);
     if (!age_class.closed) return success(res, age_class);
 
     const category = await Category.find({ age_class: age_class_id });
