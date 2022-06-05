@@ -10,7 +10,7 @@ info:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
 host: "localhost:2500"
-basePath: "/api/v1"
+basePath: "/api/v2"
 tags:
 - name: "Login"
   description: "API referred to login"
@@ -201,7 +201,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "id"
+          name: "athlete_id"
           description: "ID of the athlete that need to be update"
           required: true
           type: "string"
@@ -274,7 +274,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "id"
+          name: "athlete_id"
           description: "ID of the athlete that need to be delete"
           required: true
           type: "string"
@@ -332,7 +332,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "Club Name"
+          name: "club_name"
           description: "Name of the club"
           required: true
           type: "string"
@@ -516,7 +516,7 @@ paths:
         - Bearer: []
       parameters:
         - in: path
-          name: "ageclass_id"
+          name: "age_class"
           description: "The ID of the age class of which you want to know if it can be reopened"
           required: true
           type: "string"
@@ -555,7 +555,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "ageclass_id"
+          name: "age_class"
           description: "The ID of the age class of which you want to reopened"
           required: true
           type: "string"
@@ -589,7 +589,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "Match ID"
+          name: "match_id"
           description: "ID of the match you want to retrieve data"
           required: true
           type: "string"
@@ -627,7 +627,7 @@ paths:
         - Bearer: []
       parameters:
         - in: path
-          name: "Match ID"
+          name: "match_id"
           description: "ID of the match you want to update"
           required: true
           type: "string"
@@ -849,7 +849,7 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "competition_id"
+          name: "tournament_id"
           description: "ID of the competition"
           required: true
           type: "string"
@@ -991,7 +991,7 @@ paths:
         - Bearer: []
       parameters:
         - in: path
-          name: "tournamen_id"
+          name: "tournament_id"
           description: "ID of the tournament to reserve"
           required: true
           type: "string"
@@ -1250,4 +1250,3 @@ definitions:
 externalDocs:
   description: "Link to Backend Repository"
   url: "https://github.com/Marrocco-Simone/Judo-in-Cloud-Backend.git"
-  
