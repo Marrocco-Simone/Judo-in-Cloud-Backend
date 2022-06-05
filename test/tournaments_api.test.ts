@@ -79,6 +79,19 @@ test(`POST ${tour_reserve_route} should reserve the tournament`, async () => {
 });
 
 test(`POST ${non_existent_tour_reserve_route} should fail with status 404 not found`, async () => {
+  const invalid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(invalid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(non_existent_tour_reserve_route, {
+    method: 'POST',
+    body: JSON.stringify({ tatami_number: 1 }),
+    headers: { authorization, 'Content-Type': 'application/json' },
+  });
+  expect(res.status).toBe(404);
+
+  const json_res = await res.json();
+  expect(json_res.status).toBe('fail');
 });
 
 test(`POST ${invalid_tour_reserve_route} should fail with status 400 since the id is invalid`, async () => {
