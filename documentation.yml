@@ -690,16 +690,34 @@ paths:
       responses:
         "200":
           description: "Competition that you own the indicated slug field"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data:
+                $ref: '#/definitions/Competition'
         "404":
           description: "Competition not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                type: string
+                example: "fail"
+              message:
+                type: string
+                example: "Competition not found"
+
+
         "500":
           description: "Internal error"
         
-  /competition/{competition_id}/tournaments:
+  /competition/{tournament_id}/tournaments:
     get:
       tags:
         - "Competition"
-      summary: "Get all tounrmanets of a given competition"
+      summary: "Get all tournamets of a given competition"
       produces:
         - "application/json"
       security:
@@ -714,10 +732,36 @@ paths:
       responses:
         "200":
           description: "List of the competition's tournament"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data: 
+                $ref: '#/definitions/Tournament'
         "400":
           description: "The id passed is not a valid ObjectId"
+          schema:
+            type: object
+            properties: 
+              status:
+                type: string
+                example: "fail"
+              message:
+                type: string
+                example: "Id competizione non valido"
         "404":
           description: "Competition not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                type: string
+                example: "fail"
+              message:
+                type: string
+                example: "Competition not found"
+
         "500":
           description: "Internal error"
   
