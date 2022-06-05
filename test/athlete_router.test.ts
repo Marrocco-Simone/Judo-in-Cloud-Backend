@@ -336,9 +336,7 @@ test(`PUT ${athlete_1_route} should correctly update the athlete and return the 
     }
   });
   const json_res = await res.json();
-  
-  
-  
+
   expect(res.status).toBe(200);
 
   expect(json_res).toEqual({
@@ -366,7 +364,7 @@ test(`PUT ${athlete_1_route} with invalid data should should return the fail sta
   const invalid_bodies = [
     { gender: 'Z' },
     { weight: 'foo' },
-    { year: 'foo' },
+    { birth_year: 'foo' },
   ];
 
   for (const body of invalid_bodies) {
@@ -406,9 +404,6 @@ test(`PUT ${unauth_athlete_route} should fail and return the unauthorized status
   });
   const json_res = await res.json();
   expect(res.status).toBe(403);
-
-  
-
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
@@ -460,8 +455,6 @@ test(`PUT ${invalid_athlete_route} should fail and return the bad request status
   const json_res = await res.json();
   expect(res.status).toBe(400);
 
-  
-
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
 });
@@ -490,9 +483,6 @@ test(`PUT ${athlete_1_route} should fail since the age class is closed and retur
   });
   const json_res = await res.json();
   expect(res.status).toBe(400);
-  
-  
-
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
@@ -511,6 +501,7 @@ test(`DELETE ${athlete_1_route} should succeed`, async () => {
   const json_res = await res.json();
 
   expect(res.status).toBe(200);
+  expect(json_res.status).toBe('success');
 
   // check that it was actually deleted
   const athlete = await Athlete.findById(athlete_id_1);
