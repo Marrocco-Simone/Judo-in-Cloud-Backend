@@ -63,7 +63,7 @@ paths:
               password:
                 type: "string"
             example:
-              username: username
+              username: admin
               password: password
       responses:
         200:
@@ -903,6 +903,10 @@ paths:
       responses:
         "200":
           description: "List of tournaments"
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Tournament'
         "500":
           description: "Internal error"
 
@@ -917,19 +921,31 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "ID of the tournament you want to retrieve data"
+          name: "tournament_id"
+          description: "ID of the tournament you want to retrieve data"
           required: true
           type: "string"
           format: "ObjectId"
       responses:
         "200":
           description: "Tournament data"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tournament'
         "400":
           description: "Tournament not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Torneo non trovato"
         "500":
           description: "Internal error"
 
-  /tournament/{tournament_id}/next:
+  /tournament/{tournament_id}/matches:
     get:
       tags:
         - "Tournament"
@@ -940,15 +956,27 @@ paths:
         - Bearer: []
       parameters:
         - in: "path"
-          name: "ID of the tournament you want to get matches of"
+          name: "tournament_id"
+          description: "ID of the tournament you want to get matches of"
           required: true
           type: "string"
           format: "ObjectId"
       responses:
         "200":
           description: "List of matches of the tournament"
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Match'
         "400":
           description: "Tournament not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              message:
+                example: "No tournament found"
         "500":
           description: "Internal error"
 
@@ -963,7 +991,8 @@ paths:
         - Bearer: []
       parameters:
         - in: path
-          name: "ID of the tournament to reserve"
+          name: "tournamen_id"
+          description: "ID of the tournament to reserve"
           required: true
           type: "string"
           format: "ObjectId"
@@ -979,8 +1008,22 @@ paths:
       responses:
         "200":
           description: "Tournament reserve"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "success"
+              data: 
+                $ref: '#/definitions/Tournament'
         "404":
           description: "Tournament not found"
+          schema:
+            type: object
+            properties: 
+              status:
+                example: "fail"
+              message:
+                example: "Tournament not found"
         "500":
           description: "Internal error"
 
@@ -1098,11 +1141,9 @@ definitions:
         type: "string"
         format: "ObjectId"
       white_athlete:
-        type: "string"
-        format: "ObjectId"
+        $ref: '#/definitions/Athlete'
       red_athlete:
-        type: "string"
-        format: "ObjectId"
+        $ref: '#/definitions/Athlete'
       winner_athlete:
         type: "string"
         format: "ObjectId"
@@ -1159,6 +1200,7 @@ definitions:
       tatami_number:
         type: "integer"
         format: "int64"
+        example: 1
       finished:
         type: "boolean"
         default: "false"
@@ -1168,8 +1210,8 @@ definitions:
       athletes:
         type: "array"
         items: 
-          type: "object"
-          format: "ObjectId"
+          type: "string"
+          format: ObjectId
       winners_bracket:
         type: "array"
         items: 
