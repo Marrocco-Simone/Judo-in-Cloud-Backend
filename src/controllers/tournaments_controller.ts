@@ -103,14 +103,14 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
   try {
     const id = req.params.tournament_id;
     if (!mongoose.isValidObjectId(id)) {
-      fail(res, 'Tournament id is not valid');
+      return fail(res, 'Tournament id is not valid');
     }
     if (typeof (req.body.tatami_number) === 'undefined') {
-      fail(res, 'You must pass a tatami number');
+      return fail(res, 'You must pass a tatami number');
     }
     const update_tournament = await Tournament.findById(id);
     if (update_tournament === null) {
-      fail(res, 'Tournament not found', 404);
+      return fail(res, 'Tournament not found', 404);
     }
     update_tournament.tatami_number = req.body.tatami_number;
     const updated_tournament = await update_tournament.save();
