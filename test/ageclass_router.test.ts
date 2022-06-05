@@ -973,3 +973,251 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should return can_reopen = 
     status: 'success'
   });
 });
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back unauthorized error if there is no jwt`, async () => {
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_1.toString()}`, {
+    method: 'POST'
+  });
+
+  expect(res.status).toBe(401);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Unauthorized',
+    status: 'fail'
+  });
+});
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back an error if there is no age_class linked to the id in the url`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = new mongoose.Types.ObjectId();
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_3.toString()}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(404);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Age class not found',
+    status: 'fail'
+  });
+});
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back an error if the age_class linked in the url is not a valid id`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const age_class_id_3 = 'an invalid mongodb id';
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_3}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(500);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
+    status: 'error'
+  });
+});
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back an error if the authenticated user is in another competition from the one of the age class`, async () => {
+  const valid_user = { _id: user_id_2, username: 'validUserForSecondCompetition' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_2.toString()}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(403);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'This user is registered for another competition',
+    status: 'fail'
+  });
+});
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should return the age class in input, if it's not closed`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_1.toString()}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: age_class_id_1.toString(),
+      closed: false,
+      competition: competition_id_1.toString(),
+      max_age: 15,
+      name: 'Giovanissimi',
+      params: {
+        ippon_timer: 10,
+        ippon_to_win: 1,
+        match_time: 10,
+        supplemental_match_time: 2,
+        wazaari_timer: 5,
+        wazaari_to_win: 3
+      }
+    },
+    status: 'success'
+  });
+});
+
+test(`POST ${age_class_route_v2}/reopen/:age_class_id should return the age class in input, reopen the age class and delete all tournament and matches if the age class is closed`, async () => {
+  const match_id_1 = new mongoose.Types.ObjectId();
+  const match_id_2 = new mongoose.Types.ObjectId();
+  const tournament_id = new mongoose.Types.ObjectId();
+
+  const matches: MatchInterface[] = [
+    {
+      _id: match_id_1,
+      white_athlete: athlete_id_1,
+      red_athlete: athlete_id_4,
+      winner_athlete: null,
+      tournament: tournament_id,
+      is_started: false,
+      is_over: false,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: null,
+        white_ippon: null,
+        white_wazaari: null,
+        white_penalties: null,
+        red_ippon: null,
+        red_wazaari: null,
+        red_penalties: null
+      },
+    },
+    {
+      _id: match_id_2,
+      white_athlete: athlete_id_2,
+      red_athlete: athlete_id_3,
+      winner_athlete: null,
+      tournament: tournament_id,
+      is_started: false,
+      is_over: false,
+      match_type: 1,
+      loser_recovered: false,
+      match_scores: {
+        final_time: null,
+        white_ippon: null,
+        white_wazaari: null,
+        white_penalties: null,
+        red_ippon: null,
+        red_wazaari: null,
+        red_penalties: null
+      },
+    }
+  ];
+
+  await Match.insertMany(matches);
+
+  const tournament = new Tournament({
+    _id: tournament_id,
+    competition: competition_id_1,
+    category: category_id_2,
+    tatami_number: 1,
+    finished: false,
+    athletes: [
+      athlete_id_1,
+      athlete_id_2,
+      athlete_id_3,
+      athlete_id_4
+    ],
+    winners_bracket: [
+      [
+        match_id_1,
+        match_id_2
+      ],
+      [
+        null
+      ]
+    ],
+    recovered_bracket_1: [
+      [
+        null
+      ]
+    ],
+    recovered_bracket_2: [
+      [
+        null
+      ]
+    ]
+  });
+
+  await tournament.save();
+
+  await AgeClass.updateOne({ _id: age_class_id_2 }, { $set: { closed: true } });
+
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const access_token = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(`${age_class_route_v2}/reopen/${age_class_id_2.toString()}`, {
+    method: 'POST',
+    headers: {
+      authorization: access_token
+    }
+  });
+
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: age_class_id_2.toString(),
+      closed: false,
+      competition: competition_id_1.toString(),
+      max_age: 13,
+      name: 'Esordienti',
+      params: {
+        ippon_timer: 7,
+        ippon_to_win: 1,
+        match_time: 5,
+        supplemental_match_time: 1,
+        wazaari_timer: 5,
+        wazaari_to_win: 2
+      }
+    },
+    status: 'success'
+  });
+
+  expect(await Match.count({})).toBe(0);
+  expect(await Tournament.count({})).toBe(0);
+});
