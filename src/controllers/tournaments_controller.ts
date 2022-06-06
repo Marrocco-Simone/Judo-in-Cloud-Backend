@@ -157,7 +157,9 @@ export const get_tournament_leaderboard: RequestHandler = async (req, res) => {
         path: 'recovered_bracket_2',
         model: 'Match',
       });
-    if (!tournament) throw new Error('No tournament found');
+    if (!tournament) {
+      return fail(res, 'Torneo non trovato', 404);
+    }
 
     const {
       winners_bracket,
