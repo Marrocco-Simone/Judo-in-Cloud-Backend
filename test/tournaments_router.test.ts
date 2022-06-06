@@ -9,8 +9,11 @@ const tournament_id = new mongoose.Types.ObjectId();
 const competition_id = new mongoose.Types.ObjectId();
 const category_id = new mongoose.Types.ObjectId();
 const user_id_1 = new mongoose.Types.ObjectId();
+const tournament_id_unexisting = new mongoose.Types.ObjectId();
 
 const tournament_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}`;
+const tournament_route_nonvalidid = 'http://localhost:2500/api/v2/tournaments/123';
+const tournament_route_unexisting = `http://localhost:2500/api/v2/tournaments/${tournament_id_unexisting}`;
 
 let server;
 
@@ -20,6 +23,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await Competition.deleteMany({});
+  await Category.deleteMany({});
   await Tournament.deleteMany({});
 
   const competition = await new Competition({
@@ -68,6 +73,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  Tournament.deleteMany();
   await mongoose.disconnect();
   server.close();
 });
@@ -102,5 +108,31 @@ test(`GET ${tournament_route} should return the tournament data`, async () => {
       winners_bracket: [],
     },
     status: 'success',
+  });
+});
+
+test(`GET ${tournament_route_nonvalidid} with invalid id should return 400 status bad request`, async () => {
+  const res = await node_fetch(tournament_route_nonvalidid, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Id torneo non valido'
+  });
+});
+
+test(`GET ${tournament_route_unexisting} with unexisting id should return 404 status not found`, async () => {
+  const res = await node_fetch(tournament_route_unexisting, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Torneo non trovato'
   });
 });
