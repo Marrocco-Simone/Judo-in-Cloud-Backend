@@ -1,14 +1,16 @@
-import { Category } from '../schemas/Category';
+import { Category, CategoryInterface } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete, AthleteInterface } from '../schemas/Athlete';
-import { Types } from 'mongoose';
-import { Tournament } from '../schemas';
+import mongoose, { Types } from 'mongoose';
+import { AgeClass, Tournament } from '../schemas';
 import { RequestHandler } from 'express';
 
 // Getting all
 export const get_athletes: RequestHandler = async (req, res) => {
   try {
-    const athletes = await Athlete.find();
+    const me = req.user;
+    const competition = me.competition;
+    const athletes = await Athlete.find({ competition: competition._id });
     success(res, athletes);
   } catch (err) {
     error(res, err.message, 500);
@@ -46,6 +48,9 @@ export const get_athletes_by_club = async (req, res) => {
         },
       ],
     });
+
+    if (!athletes.length) return fail(res, 'The club was not found', 404);
+
     const tournaments = await Tournament.find();
 
     const category_to_tournament: { [category_id: string]: Types.ObjectId } =
@@ -88,7 +93,6 @@ export const create_athlete: RequestHandler = async (req, res) => {
     birth_year: number;
   } = req.body;
 
-  console.log(req.user);
   if (
     !body.name ||
     !body.surname ||
@@ -96,9 +100,13 @@ export const create_athlete: RequestHandler = async (req, res) => {
     !body.gender ||
     !body.weight ||
     !body.birth_year
-  ) return fail(res, 'Campi Incompleti');
+  ) {
+    return fail(res, 'Campi Incompleti');
+  }
 
-  if (body.gender !== 'M' && body.gender !== 'F') return fail(res, 'Campo gender deve essere M o F');
+  if (body.gender !== 'M' && body.gender !== 'F') {
+    return fail(res, 'Campo gender deve essere M o F');
+  }
 
   try {
     const athlete = new Athlete({
@@ -112,9 +120,16 @@ export const create_athlete: RequestHandler = async (req, res) => {
       category: await computeCategory(
         body.birth_year,
         body.weight,
-        body.gender
+        body.gender,
+        req.user.competition._id
       ),
     });
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if (new_athlete_ageclass.closed) {
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
+
     const new_athlete = await athlete.save();
     success(res, new_athlete);
   } catch (err) {
@@ -124,9 +139,14 @@ export const create_athlete: RequestHandler = async (req, res) => {
 
 // Modify an athlete
 /* API V2 */
-export const update_athlete = async (req, res) => {
+export const update_athlete: RequestHandler = async (req, res) => {
   try {
-    const id = new Types.ObjectId(req.params.athlete_id);
+    const me = req.user;
+    const competition = me.competition;
+    if (!mongoose.isValidObjectId(req.params.athlete_id)) {
+      return fail(res, 'Id dell\'atleta non valido');
+    }
+    const id = new mongoose.Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
     if (!athlete) return fail(res, 'Athlete not found', 404);
 
@@ -140,6 +160,18 @@ export const update_athlete = async (req, res) => {
       birth_year?: number;
     } = req.body;
 
+    if (!athlete.competition.equals(competition._id)) {
+      return fail(res, 'Non sei autorizzato', 403);
+    }
+
+    if (
+      (typeof (body.birth_year) !== 'undefined' && typeof (body.birth_year) !== 'number') ||
+      (typeof (body.weight) !== 'undefined' && typeof (body.weight) !== 'number') ||
+      (typeof (body.gender) !== 'undefined' && body.gender !== 'M' && body.gender !== 'F')
+    ) {
+      return fail(res, 'Anno di nascita, peso e sesso devono essere dei valori validi');
+    }
+
     if (body.name) athlete.name = body.name;
     if (body.surname) athlete.surname = body.surname;
     if (body.club) athlete.club = body.club;
@@ -148,14 +180,22 @@ export const update_athlete = async (req, res) => {
     if (body.birth_year) athlete.birth_year = body.birth_year;
     if (body.gender || body.weight || body.birth_year) {
       athlete.category = await computeCategory(
-        body.birth_year,
-        body.weight,
-        body.gender
+        athlete.birth_year,
+        athlete.weight,
+        athlete.gender,
+        req.user.competition._id,
       );
     }
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if (new_athlete_ageclass.closed) {
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
+
     await athlete.save();
     success(res, athlete, 200);
   } catch (err) {
+    console.error({ err });
     error(res, err.message, 500);
   }
 };
@@ -164,14 +204,27 @@ export const update_athlete = async (req, res) => {
 /* API V2 */
 export const delete_athlete: RequestHandler = async (req, res) => {
   try {
-    const id = new Types.ObjectId(req.params.athlete_id);
+    if (!mongoose.isValidObjectId(req.params.athlete_id)) {
+      return fail(res, 'Id dell\'atleta non valido');
+    }
+    const me = req.user;
+    const competition = me.competition;
+    const id = new mongoose.Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
     if (!athlete) return fail(res, 'Athlete not found', 404);
-
+    if (!athlete.competition.equals(competition._id)) {
+      return fail(res, 'Non sei autorizzato', 403);
+    }
+    const new_athlete_category = await Category.findById(athlete.category);
+    const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
+    if (new_athlete_ageclass.closed) {
+      return fail(res, 'Cannot delete athlete since age class is closed');
+    }
     await athlete.remove();
     success(res, athlete, 200);
   } catch (err) {
-    fail(res, err.message, 500);
+    console.error(err);
+    fail(res, 'Internal error: '+err.message, 500);
   }
 };
 
@@ -179,24 +232,32 @@ export const delete_athlete: RequestHandler = async (req, res) => {
 async function computeCategory(
   birth_year: number,
   weight: number,
-  gender: 'M' | 'F'
+  gender: 'M' | 'F',
+  competition: Types.ObjectId
 ) {
-  const d = new Date();
-  const current_year: number = d.getFullYear();
+  const current_year: number = new Date().getFullYear();
   const athlete_age = current_year - birth_year;
-  const category = await Category.find({
+  const age_classes = await AgeClass.find({
+    competition,
+    max_age: { $gt: athlete_age },
+  });
+  const best_age_class = age_classes.reduce((curr, age_class) => {
+    if (curr === null || age_class.max_age < curr.max_age) {
+      return age_class;
+    }
+    return curr;
+  }, null);
+  // controllo se best_age_class e' chiusa
+  const categories = await Category.find({
+    age_class: best_age_class._id,
     gender,
     max_weight: { $gt: weight },
-  }).populate('age_class');
-  let best_category = category[0];
-  for (const cat of category) {
-    // @ts-ignore
-    if (cat.age_class.max_age < athlete_age) continue;
-    // @ts-ignore
-    if (cat.age_class.max_age > best_category.age_class.max_age) continue;
-    if (cat.max_weight < weight) continue;
-    if (cat.max_weight > best_category.max_weight) continue;
-    best_category = cat;
-  }
+  });
+  const best_category = categories.reduce((curr, category) => {
+    if (curr === null || category.max_weight < curr.max_weight) {
+      return category;
+    }
+    return curr;
+  }, null);
   return best_category._id;
 }
