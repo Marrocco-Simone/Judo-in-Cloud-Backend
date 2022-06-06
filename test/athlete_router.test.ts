@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { AgeClass, Athlete, Category, Competition, Tournament, User } from '../src/schemas';
+import { AgeClass, Athlete, Category, Competition, User } from '../src/schemas';
 import { AgeClassInterface } from '../src/schemas/AgeClass';
 import { CategoryInterface } from '../src/schemas/Category';
 import { AthleteInterface } from '../src/schemas/Athlete';
@@ -127,8 +127,6 @@ beforeEach(async () => {
 
   await Athlete.remove({});
   await Athlete.insertMany(athletes);
-
-  await Tournament.remove({});
 });
 
 afterAll(async () => {
