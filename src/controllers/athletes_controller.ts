@@ -100,9 +100,13 @@ export const create_athlete: RequestHandler = async (req, res) => {
     !body.gender ||
     !body.weight ||
     !body.birth_year
-  ) return fail(res, 'Campi Incompleti');
+  ) {
+    return fail(res, 'Campi Incompleti');
+  }
 
-  if (body.gender !== 'M' && body.gender !== 'F') return fail(res, 'Campo gender deve essere M o F');
+  if (body.gender !== 'M' && body.gender !== 'F') {
+    return fail(res, 'Campo gender deve essere M o F');
+  }
 
   try {
     const athlete = new Athlete({
@@ -116,7 +120,8 @@ export const create_athlete: RequestHandler = async (req, res) => {
       category: await computeCategory(
         body.birth_year,
         body.weight,
-        body.gender
+        body.gender,
+        req.user.competition._id
       ),
     });
     const new_athlete_category = await Category.findById(athlete.category);
@@ -177,7 +182,8 @@ export const update_athlete: RequestHandler = async (req, res) => {
       athlete.category = await computeCategory(
         athlete.birth_year,
         athlete.weight,
-        athlete.gender
+        athlete.gender,
+        req.user.competition._id,
       );
     }
     const new_athlete_category = await Category.findById(athlete.category);
@@ -226,24 +232,32 @@ export const delete_athlete: RequestHandler = async (req, res) => {
 async function computeCategory(
   birth_year: number,
   weight: number,
-  gender: 'M' | 'F'
+  gender: 'M' | 'F',
+  competition: Types.ObjectId
 ) {
-  const d = new Date();
-  const current_year: number = d.getFullYear();
+  const current_year: number = new Date().getFullYear();
   const athlete_age = current_year - birth_year;
-  const category = await Category.find({
+  const age_classes = await AgeClass.find({
+    competition,
+    max_age: { $gt: athlete_age },
+  });
+  const best_age_class = age_classes.reduce((curr, age_class) => {
+    if (curr === null || age_class.max_age < curr.max_age) {
+      return age_class;
+    }
+    return curr;
+  }, null);
+  // controllo se best_age_class e' chiusa
+  const categories = await Category.find({
+    age_class: best_age_class._id,
     gender,
     max_weight: { $gt: weight },
-  }).populate('age_class');
-  let best_category:CategoryInterface = category[0];
-  for (const cat of category) {
-    // @ts-ignore
-    if (cat.age_class.max_age < athlete_age) continue;
-    // @ts-ignore
-    if (cat.age_class.max_age > best_category.age_class.max_age) continue;
-    if (cat.max_weight < weight) continue;
-    if (cat.max_weight > best_category.max_weight) continue;
-    best_category = cat;
-  }
+  });
+  const best_category = categories.reduce((curr, category) => {
+    if (curr === null || category.max_weight < curr.max_weight) {
+      return category;
+    }
+    return curr;
+  }, null);
   return best_category._id;
 }
