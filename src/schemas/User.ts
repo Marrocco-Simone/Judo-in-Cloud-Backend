@@ -2,6 +2,7 @@ import { model, Schema, SchemaTypes, Types } from 'mongoose';
 import { CompetitionInterface } from './Competition';
 
 export interface UserInterface {
+  _id?: Types.ObjectId;
   username: string;
   password: string;
   competition: CompetitionInterface | Types.ObjectId;

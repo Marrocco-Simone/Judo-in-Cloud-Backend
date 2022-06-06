@@ -1,5 +1,3 @@
-import { Types } from 'mongoose';
-import { BracketT, MatchT } from './bracket_utils';
 import {
   calculateMainVictory,
   calculateVictory,
@@ -80,20 +78,16 @@ test('builds a bracket with 5 players', () => {
 
 test('correctly calculates a victory', () => {
   const bracket = generateMainBracket(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as any[]);
-  let newBracket = calculateVictory(bracket, 0, 0, 0); // 'A' wins
-  expect(newBracket[1][0]!.players).toEqual(['A', null]);
+  let new_bracket = calculateVictory(bracket, 0, 0, 0); // 'A' wins
+  expect(new_bracket[1][0]!.players).toEqual(['A', null]);
 
-  newBracket = calculateVictory(bracket, 0, 0, 1); // 'I' wins
-  expect(newBracket[1][0]!.players).toEqual(['I', null]);
+  new_bracket = calculateVictory(bracket, 0, 0, 1); // 'I' wins
+  expect(new_bracket[1][0]!.players).toEqual(['I', null]);
   // expect(newBracket[0][0]!.loserRecovered).toBe(false);
 
-  newBracket = calculateVictory(newBracket, 0, 1, 0); // 'B' wins
-  newBracket = calculateVictory(newBracket, 1, 0, 0); // 'I' wins
-  expect(newBracket[2][0]!.players).toEqual(['I', null]);
-
-  // expect(newBracket[0][0]!.loserRecovered).toBe(true); // 'A' recovered
-  // expect(newBracket[0][1]!.loserRecovered).toBe(false); // 'J' not recovered
-  // expect(newBracket[1][0]!.loserRecovered).toBe(true); // 'I' recovered
+  new_bracket = calculateVictory(new_bracket, 0, 1, 0); // 'B' wins
+  new_bracket = calculateVictory(new_bracket, 1, 0, 0); // 'I' wins
+  expect(new_bracket[2][0]!.players).toEqual(['I', null]);
 });
 
 test('throws error on invalid match selection', () => {
@@ -101,16 +95,16 @@ test('throws error on invalid match selection', () => {
   expect(() => calculateVictory(bracket, 1, 0, 0)).toThrowError(); // no match
   expect(() => calculateVictory(bracket, 0, 2, 1)).toThrowError(); // empty player
 
-  const newBracket = calculateVictory(bracket, 0, 0, 0);
-  expect(() => calculateVictory(newBracket, 0, 0, 1)).toThrowError(); // repeating match
+  const new_bracket = calculateVictory(bracket, 0, 0, 0);
+  expect(() => calculateVictory(new_bracket, 0, 0, 1)).toThrowError(); // repeating match
 });
 
 test('identifies the bracket winner', () => {
   const bracket = generateMainBracket(['A', 'B'] as any[]);
-  const newBracket = calculateVictory(bracket, 0, 0, 0);
+  const new_bracket = calculateVictory(bracket, 0, 0, 0);
 
   expect(getBracketWinner(bracket)).toBeNull();
-  expect(getBracketWinner(newBracket)).toBe('A');
+  expect(getBracketWinner(new_bracket)).toBe('A');
 });
 
 test('finds the correct recovery bracket identifier', () => {
@@ -295,21 +289,21 @@ test('finds the correct location in recovery bracket', () => {
 
 test('correctly identifies and sets recovered players', () => {
   const brackets = generateBrackets(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as any[]);
-  let newBrackets = calculateMainVictory(brackets, 0, 0, 0); // 'A' wins
-  expect(newBrackets.recovery![0][0][0]).toEqual({
+  let new_brackets = calculateMainVictory(brackets, 0, 0, 0); // 'A' wins
+  expect(new_brackets.recovery![0][0][0]).toEqual({
     players: ['E', null],
     loserRecovered: false,
     winnerIdx: null
   });
-  expect(newBrackets.main[0][0]!.loserRecovered).toBeTruthy();
-  newBrackets = calculateMainVictory(newBrackets, 0, 1, 0); // 'B' wins
-  expect(newBrackets.recovery![0][0][0]).toEqual({
+  expect(new_brackets.main[0][0]!.loserRecovered).toBeTruthy();
+  new_brackets = calculateMainVictory(new_brackets, 0, 1, 0); // 'B' wins
+  expect(new_brackets.recovery![0][0][0]).toEqual({
     players: ['E', 'F'],
     loserRecovered: false,
     winnerIdx: null
   });
-  newBrackets = calculateMainVictory(newBrackets, 1, 0, 0); // 'A' wins
-  expect(newBrackets.recovery![1][1][0]).toEqual({
+  new_brackets = calculateMainVictory(new_brackets, 1, 0, 0); // 'A' wins
+  expect(new_brackets.recovery![1][1][0]).toEqual({
     players: [null, 'B'],
     loserRecovered: false,
     winnerIdx: null

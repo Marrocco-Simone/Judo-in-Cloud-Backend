@@ -3,6 +3,7 @@ import { is_age_class_reopenable, reopen_age_class } from '../controllers/age_cl
 import { delete_athlete, get_athletes_by_club, get_clubs, update_athlete } from '../controllers/athletes_controller';
 import { find_competition, get_competition_tournaments } from '../controllers/competitions_controller';
 import { get_tournament, reserve_tournament } from '../controllers/tournaments_controller';
+import { test } from '../controllers/super_users_controller';
 import { authenticate_token } from '../middlewares/AuthenticateMiddleware';
 import { requires_competition } from '../middlewares/RequiresCompetition';
 
@@ -35,7 +36,14 @@ athletes_router.use(authenticate_token, requires_competition);
 athletes_router.put('/:athlete_id', update_athlete);
 athletes_router.delete('/:athlete_id', delete_athlete);
 
+// routes for super admin
+const super_users_router = app.Router();
+super_users_router.use(authenticate_token, requires_competition);
+// TODO eliminare
+super_users_router.get('/test', test);
+
 api_v2_router.use('/competitions', competitions_router);
 api_v2_router.use('/tournaments', tournaments_router);
 api_v2_router.use('/age_classes', age_classes_router);
 api_v2_router.use('/athletes', athletes_router);
+api_v2_router.use('/superuser', super_users_router);

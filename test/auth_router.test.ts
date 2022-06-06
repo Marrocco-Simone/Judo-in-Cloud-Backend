@@ -51,6 +51,8 @@ afterAll(async () => {
 test(`GET ${auth_route} should give back unauthorized error if there is no jwt`, async () => {
   const res = await node_fetch(auth_route);
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -72,6 +74,8 @@ test(`GET ${auth_route} should give back unauthorized error if the jwt is linked
     }
   });
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -90,6 +94,8 @@ test(`GET ${auth_route} should give back the user associated to the jwt if valid
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -118,6 +124,8 @@ test(`POST ${auth_route} should give an error message if there is no username or
     method: 'POST'
   });
 
+  expect(res.status).toBe(400);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -139,6 +147,8 @@ test(`POST ${auth_route} should give an error message if there is no user matchi
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
@@ -162,6 +172,8 @@ test(`POST ${auth_route} should give an error message if the password inside the
     }
   });
 
+  expect(res.status).toBe(400);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -183,6 +195,8 @@ test(`POST ${auth_route} should correctly log in a user, given valid username an
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
