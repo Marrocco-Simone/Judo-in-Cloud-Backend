@@ -243,3 +243,18 @@ test(`GET ${leaderboard_route} should return the final leaderboard`, async () =>
     { place: 5, athlete: player_fifth_2.toString() },
   ]);
 });
+
+test(`GET ${unfinished_leaderboard_route} should fail with status 400 since the tournament is not finished`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(unfinished_leaderboard_route, {
+    method: 'GET',
+    headers: { authorization },
+  });
+  const json_res = await res.json();
+
+  expect(res.status).toBe(400);
+  expect(json_res.status).toBe('fail');
+});
