@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "Applicazione per gestire le partite e i tornei di judo"
+  description: "Application that allow you to manage judo's matches and tournaments"
   version: "1.0.0"
   title: "judo-in-cloud-be"
   termsOfService: "http://swagger.io/terms/"
@@ -9,7 +9,7 @@ info:
   license:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
-host: "localhost:2500"
+host: "judoincloud.herokuapp.com"
 basePath: "/api/v2"
 tags:
 - name: "Login"
@@ -1032,6 +1032,7 @@ securityDefinitions:
     type: "apiKey"
     name: "authorization"
     in: "header"
+    description: "To geto the token you must access to the /auth path passing in the body your username and password"
 
 
 definitions:
