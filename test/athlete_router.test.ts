@@ -27,6 +27,7 @@ const athlete_1_route = `http://localhost:2500/api/v2/athletes/${athlete_id_1}`;
 const unauth_athlete_route = `http://localhost:2500/api/v2/athletes/${unauth_athlete_id}`;
 const nonexistent_athlete_route = `http://localhost:2500/api/v2/athletes/${new mongoose.Types.ObjectId()}`;
 const invalid_athlete_route = 'http://localhost:2500/api/v2/athletes/123';
+const club_route = 'http://localhost:2500/api/v2/athletes/club';
 
 const age_classes: AgeClassInterface[] = [
   {
@@ -137,6 +138,8 @@ afterAll(async () => {
 test(`GET ${athlete_route} should give back unauthorized error if there is no jwt`, async () => {
   const res = await node_fetch(athlete_route);
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -155,6 +158,8 @@ test(`GET ${athlete_route} should give back all the athletes with a valid jwt`, 
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
   expect(json_res).toEqual({
@@ -193,6 +198,8 @@ test(`POST ${athlete_route} should give back unauthorized error if there is no j
     method: 'POST'
   });
 
+  expect(res.status).toBe(401);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -225,6 +232,8 @@ test(`POST ${athlete_route} should give back an error if the parameters in the b
     }
   });
 
+  expect(res.status).toBe(500);
+
   const json_res = await res.json();
 
   expect(json_res).toEqual({
@@ -255,6 +264,8 @@ test(`POST ${athlete_route} should give back an error if the parameters in the b
       'Content-Type': 'application/json'
     }
   });
+
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
@@ -287,6 +298,8 @@ test(`POST ${athlete_route} should correctly create a new athlete with the right
       authorization: access_token
     }
   });
+
+  expect(res.status).toBe(200);
 
   const json_res = await res.json();
 
@@ -577,4 +590,80 @@ test(`DELETE ${athlete_1_route} should fail with status 400 since the age class 
 
   expect(json_res.status).toBe('fail');
   expect(json_res).toHaveProperty('message');
+});
+
+test(`GET ${club_route} should return the club list no matter the authorization headers`, async () => {
+  const res = await node_fetch(club_route);
+
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: [
+      'Judo Bologna',
+      'Judo Treviso',
+      'Judo Verona',
+    ],
+    status: 'success'
+  });
+});
+
+test(`GET ${club_route}/:club should return the athletes list for the club no matter the authorization headers`, async () => {
+  const res = await node_fetch(`${club_route}/Judo Bologna`);
+
+  expect(res.status).toBe(200);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: [
+      {
+        _id: athlete_id_1.toString(),
+        birth_year: 2010,
+        category: {
+          __v: 0,
+          _id: category_id_1.toString(),
+          age_class: {
+            __v: 0,
+            _id: age_class_id_1.toString(),
+            closed: false,
+            competition: competition_id.toString(),
+            max_age: 13,
+            name: 'Esordienti',
+            params: {
+              ippon_timer: 7,
+              ippon_to_win: 1,
+              match_time: 5,
+              supplemental_match_time: 1,
+              wazaari_timer: 5,
+              wazaari_to_win: 2,
+            },
+          },
+          gender: 'M',
+          max_weight: '50',
+        },
+        club: 'Judo Bologna',
+        competition: competition_id.toString(),
+        gender: 'M',
+        name: 'Marco',
+        surname: 'Rossi',
+        weight: 48,
+      }
+    ],
+    status: 'success'
+  });
+});
+
+test(`GET ${club_route}/:club should fail with status 404 if the club in input is non existent`, async () => {
+  const res = await node_fetch(`${club_route}/Judo Canova`);
+
+  expect(res.status).toBe(404);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'The club was not found',
+    status: 'fail'
+  });
 });

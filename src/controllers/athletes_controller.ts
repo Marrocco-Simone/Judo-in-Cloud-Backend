@@ -48,6 +48,9 @@ export const get_athletes_by_club = async (req, res) => {
         },
       ],
     });
+
+    if (!athletes.length) return fail(res, 'The club was not found', 404);
+
     const tournaments = await Tournament.find();
 
     const category_to_tournament: { [category_id: string]: Types.ObjectId } =
