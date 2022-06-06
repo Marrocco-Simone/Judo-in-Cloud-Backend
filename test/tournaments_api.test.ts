@@ -33,6 +33,8 @@ const invalid_tour_reserve_route = 'http://localhost:2500/api/v2/tournaments/res
 const unauth_tour_reserve_route = `http://localhost:2500/api/v2/tournaments/reserve/${unauth_tournament_id}`;
 const unfinished_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}/leaderboard`;
 const leaderboard_route = `http://localhost:2500/api/v2/tournaments/${finished_tournament_id}/leaderboard`;
+const invalid_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${123}/leaderboard`;
+const non_existent_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${new mongoose.Types.ObjectId()}/leaderboard`;
 
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
@@ -256,5 +258,20 @@ test(`GET ${unfinished_leaderboard_route} should fail with status 400 since the 
   const json_res = await res.json();
 
   expect(res.status).toBe(400);
+  expect(json_res.status).toBe('fail');
+});
+
+test(`GET ${non_existent_leaderboard_route} should fail with status 404 not found since the tournament doesn't exist`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(non_existent_leaderboard_route, {
+    method: 'GET',
+    headers: { authorization },
+  });
+  const json_res = await res.json();
+
+  expect(res.status).toBe(404);
   expect(json_res.status).toBe('fail');
 });
