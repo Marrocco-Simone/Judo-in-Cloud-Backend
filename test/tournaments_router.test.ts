@@ -10,7 +10,7 @@ const competition_id = new mongoose.Types.ObjectId();
 const category_id = new mongoose.Types.ObjectId();
 const user_id_1 = new mongoose.Types.ObjectId();
 
-const tournament_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}`
+const tournament_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}`;
 
 let server;
 
@@ -22,24 +22,24 @@ beforeAll(async () => {
 beforeEach(async () => {
   await Tournament.deleteMany({});
 
-  const _competition = await new Competition({
+  const competition = await new Competition({
     _id: competition_id,
-    name: "Gara Lavis",
-    slug: "gara-lavis"
-    
+    name: 'Gara Lavis',
+    slug: 'gara-lavis'
+
   });
 
-  await _competition.save();
+  await competition.save();
 
-  const _category = await new Category({
+  const category = await new Category({
     _id: category_id,
     age_class: null,
     max_weight: 55,
     gender: 'M'
   });
 
-  await _category.save();
-  
+  await category.save();
+
   const tournament = await new Tournament({
     _id: tournament_id,
     competition: competition_id,
@@ -51,13 +51,13 @@ beforeEach(async () => {
     recovered_bracket_1: [],
     recovered_bracket_2: []
   });
-  
+
   await tournament.save();
-  
+
   await User.deleteMany({});
-  
+
   const hash = await bcrypt.hash('pwd', 10);
-  
+
   const user_to_save = new User({
     _id: user_id_1,
     username: 'validUser',
@@ -65,9 +65,8 @@ beforeEach(async () => {
     competition: competition_id
   });
   await user_to_save.save();
-
 });
-  
+
 afterAll(async () => {
   await mongoose.disconnect();
   server.close();
@@ -83,18 +82,18 @@ test(`GET ${tournament_route} should return the tournament data`, async () => {
       __v: 0,
       _id: tournament_id.toString(),
       athletes: [],
-      category:  {
+      category: {
         __v: 0,
         _id: category_id.toString(),
         age_class: null,
-        gender: "M",
-        max_weight: "55",
+        gender: 'M',
+        max_weight: '55',
       },
-      competition:  {
+      competition: {
         __v: 0,
         _id: competition_id.toString(),
-        name: "Gara Lavis",
-        slug: "gara-lavis",
+        name: 'Gara Lavis',
+        slug: 'gara-lavis',
       },
       finished: false,
       recovered_bracket_1: [],
@@ -102,6 +101,6 @@ test(`GET ${tournament_route} should return the tournament data`, async () => {
       tatami_number: 1,
       winners_bracket: [],
     },
-    status: "success",
-  })
+    status: 'success',
+  });
 });
