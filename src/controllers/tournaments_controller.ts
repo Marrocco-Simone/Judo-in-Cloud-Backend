@@ -139,8 +139,11 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
 
 // Get leaderboard for a specific tournament
 export const get_tournament_leaderboard: RequestHandler = async (req, res) => {
+  const tournament_id = req.params.tournament_id;
+  if (!mongoose.isValidObjectId(tournament_id)) {
+    return fail(res, 'Id torneo non valido');
+  }
   try {
-    const tournament_id = req.params.tournament_id;
     const tournament = await Tournament.findById(tournament_id)
       .populate('category')
       .populate('competition')
