@@ -1,17 +1,17 @@
 import jwt from 'jsonwebtoken';
-import { Category, Competition, Tournament, User } from '../src/schemas';
+import { Athlete, Category, Competition, Match, Tournament, User } from '../src/schemas';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 import { app } from '../src/bootstrap';
 import node_fetch from 'node-fetch';
 import { Server } from 'http';
-import { Match } from '../src/schemas/Match';
 
 let server: Server;
 
 const user_id_1 = new mongoose.Types.ObjectId();
 const competition_id = new mongoose.Types.ObjectId();
+const other_competition_id = new mongoose.Types.ObjectId();
 const tournament_id = new mongoose.Types.ObjectId();
 const category_id = new mongoose.Types.ObjectId();
 const unauth_tournament_id = new mongoose.Types.ObjectId();
@@ -28,6 +28,7 @@ const player_third_2 = new mongoose.Types.ObjectId();
 const player_fifth_1 = new mongoose.Types.ObjectId();
 const player_fifth_2 = new mongoose.Types.ObjectId();
 
+const all_tournaments_route = 'http://localhost:2500/api/v2/tournaments/';
 const info_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}`;
 const invalid_info_route = 'http://localhost:2500/api/v2/tournaments/123';
 const non_existent_info_route = `http://localhost:2500/api/v2/tournaments/${new mongoose.Types.ObjectId()}`;
@@ -37,8 +38,11 @@ const invalid_tour_reserve_route = 'http://localhost:2500/api/v2/tournaments/res
 const unauth_tour_reserve_route = `http://localhost:2500/api/v2/tournaments/reserve/${unauth_tournament_id}`;
 const unfinished_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}/leaderboard`;
 const leaderboard_route = `http://localhost:2500/api/v2/tournaments/${finished_tournament_id}/leaderboard`;
-const invalid_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${123}/leaderboard`;
+const invalid_leaderboard_route = 'http://localhost:2500/api/v2/tournaments/123/leaderboard';
 const non_existent_leaderboard_route = `http://localhost:2500/api/v2/tournaments/${new mongoose.Types.ObjectId()}/leaderboard`;
+const matches_route = `http://localhost:2500/api/v2/tournaments/${finished_tournament_id}/matches`;
+const invalid_matches_route = 'http://localhost:2500/api/v2/tournaments/123/matches';
+const non_existent_matches_route = `http://localhost:2500/api/v2/tournaments/${new mongoose.Types.ObjectId()}/matches`;
 
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL_TEST);
@@ -96,6 +100,30 @@ beforeEach(async () => {
   await Match.deleteMany({});
   await Match.bulkSave(matches);
 
+  const athletes = [
+    new Athlete({
+      _id: player_first
+    }),
+    new Athlete({
+      _id: player_second
+    }),
+    new Athlete({
+      _id: player_third_1
+    }),
+    new Athlete({
+      _id: player_third_2
+    }),
+    new Athlete({
+      _id: player_fifth_1
+    }),
+    new Athlete({
+      _id: player_fifth_2
+    })
+  ];
+
+  await Athlete.deleteMany({});
+  await Athlete.bulkSave(athletes);
+
   const tournament = new Tournament({
     _id: tournament_id,
     competition: competition_id,
@@ -109,7 +137,7 @@ beforeEach(async () => {
   });
   const unauth_tournament = new Tournament({
     _id: unauth_tournament_id,
-    competition: new mongoose.Types.ObjectId(),
+    competition: other_competition_id,
     category: new mongoose.Types.ObjectId(),
     tatami_number: null,
     finished: false,
@@ -140,6 +168,76 @@ afterAll(async () => {
   await mongoose.disconnect();
 
   server.close();
+});
+
+test(`GET ${all_tournaments_route} should return the tournament data for all tournaments`, async () => {
+  const res = await node_fetch(all_tournaments_route);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: [
+      {
+        __v: 0,
+        _id: tournament_id.toString(),
+        athletes: [],
+        category: {
+          __v: 0,
+          _id: category_id.toString(),
+          age_class: null,
+          gender: 'M',
+          max_weight: '55',
+        },
+        competition: competition_id.toString(),
+        finished: false,
+        recovered_bracket_1: [],
+        recovered_bracket_2: [],
+        tatami_number: null,
+        winners_bracket: [],
+      },
+      {
+        __v: 0,
+        _id: unauth_tournament_id.toString(),
+        athletes: [],
+        category: null,
+        competition: other_competition_id.toString(),
+        finished: false,
+        recovered_bracket_1: [],
+        recovered_bracket_2: [],
+        tatami_number: null,
+        winners_bracket: [],
+      },
+      {
+        __v: 0,
+        _id: finished_tournament_id.toString(),
+        athletes: [],
+        category: null,
+        competition: competition_id.toString(),
+        finished: true,
+        recovered_bracket_1: [
+          [],
+          [
+            rec_final_match_id_1.toString(),
+          ],
+        ],
+        recovered_bracket_2: [
+          [],
+          [
+            rec_final_match_id_2.toString(),
+          ],
+        ],
+        tatami_number: null,
+        winners_bracket: [
+          [],
+          [],
+          [
+            final_match_id.toString(),
+          ],
+        ],
+      }
+    ],
+    status: 'success',
+  });
 });
 
 test(`POST ${tour_reserve_route} should reserve the tournament`, async () => {
@@ -353,6 +451,98 @@ test(`GET ${invalid_info_route} with invalid id should return 400 status bad req
 
 test(`GET ${non_existent_info_route} with unexisting id should return 404 status not found`, async () => {
   const res = await node_fetch(non_existent_info_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Torneo non trovato'
+  });
+});
+
+test(`GET ${matches_route} should return the matches correctly for a tournament that's not finished`, async () => {
+  // set the finished tournament as not finished so that we can see the matches
+  await Tournament.updateOne({ _id: finished_tournament_id }, { $set: { finished: false } });
+
+  const res = await node_fetch(matches_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: [
+      {
+        _id: rec_final_match_id_1.toString(),
+        red_athlete: {
+          _id: player_fifth_1.toString()
+        },
+        white_athlete: {
+          _id: player_third_1.toString()
+        },
+        winner_athlete: {
+          _id: player_third_1.toString()
+        },
+      },
+      {
+        _id: rec_final_match_id_2.toString(),
+        red_athlete: {
+          _id: player_third_2.toString()
+        },
+        white_athlete: {
+          _id: player_fifth_2.toString()
+        },
+        winner_athlete: {
+          _id: player_third_2.toString()
+        },
+      },
+      {
+        _id: final_match_id.toString(),
+        red_athlete: {
+          _id: player_first.toString()
+        },
+        white_athlete: {
+          _id: player_second.toString()
+        },
+        winner_athlete: {
+          _id: player_first.toString()
+        },
+      },
+    ],
+    status: 'success',
+  });
+});
+
+test(`GET ${matches_route} should return a message if the tournament's finished already`, async () => {
+  const res = await node_fetch(matches_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: [],
+    status: 'success',
+  });
+});
+
+test(`GET ${invalid_matches_route} with invalid id should return 400 status bad request`, async () => {
+  const res = await node_fetch(invalid_matches_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Id torneo non valido'
+  });
+});
+
+test(`GET ${non_existent_matches_route} with unexisting id should return 404 status not found`, async () => {
+  const res = await node_fetch(non_existent_matches_route, {
     method: 'GET'
   });
 

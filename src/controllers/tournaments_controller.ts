@@ -66,6 +66,9 @@ export const get_tournaments: RequestHandler = async (req, res) => {
 export const get_tournament_matches: RequestHandler = async (req, res) => {
   try {
     const tournament_id = req.params.tournament_id;
+    if (!mongoose.isValidObjectId(tournament_id)) {
+      return fail(res, 'Id torneo non valido');
+    }
     const tournament = await Tournament.findById(tournament_id)
       .populate('category')
       .populate('competition')
@@ -85,7 +88,9 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
         model: 'Match',
         populate: ['red_athlete', 'white_athlete', 'winner_athlete']
       });
-    if (!tournament) throw new Error('No tournament found');
+    if (!tournament) {
+      return fail(res, 'Torneo non trovato');
+    }
 
     const {
       winners_bracket,
@@ -95,7 +100,7 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
     } = tournament;
 
     if (finished) {
-      return success(res, 'The tournament\'s finished, there are no matches left to compete');
+      return success(res, []);
     }
 
     const matches = await getMatches({ winners_bracket, recovered_bracket_1, recovered_bracket_2 });
