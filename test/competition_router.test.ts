@@ -143,6 +143,8 @@ test(`GET ${competition_tournaments_route}/:competition_id/tournaments should fa
   });
 
   expect(tournament_find_stub).toBeCalledTimes(1);
+
+  tournament_find_stub.mockRestore();
 });
 
 test(`GET ${competition_tournaments_route}/:competition_id/tournaments should fail with status 404 not found if the id is valid, but not on the db`, async () => {

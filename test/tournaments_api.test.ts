@@ -240,6 +240,64 @@ test(`GET ${all_tournaments_route} should return the tournament data for all tou
   });
 });
 
+test(`GET ${info_route} should return the tournament data`, async () => {
+  const res = await node_fetch(info_route);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: tournament_id.toString(),
+      athletes: [],
+      category: {
+        __v: 0,
+        _id: category_id.toString(),
+        age_class: null,
+        gender: 'M',
+        max_weight: '55',
+      },
+      competition: {
+        __v: 0,
+        _id: competition_id.toString(),
+        name: 'competition'
+      },
+      finished: false,
+      recovered_bracket_1: [],
+      recovered_bracket_2: [],
+      tatami_number: null,
+      winners_bracket: [],
+    },
+    status: 'success',
+  });
+});
+
+test(`GET ${invalid_info_route} with invalid id should return 400 status bad request`, async () => {
+  const res = await node_fetch(invalid_info_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Id torneo non valido'
+  });
+});
+
+test(`GET ${non_existent_info_route} with unexisting id should return 404 status not found`, async () => {
+  const res = await node_fetch(non_existent_info_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Torneo non trovato'
+  });
+});
+
 test(`POST ${tour_reserve_route} should reserve the tournament`, async () => {
   const valid_user = { _id: user_id_1, username: 'validUser' };
   const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 24 });
@@ -402,64 +460,6 @@ test(`GET ${invalid_leaderboard_route} should fail with status 400 since the id 
 
   expect(res.status).toBe(400);
   expect(json_res.status).toBe('fail');
-});
-
-test(`GET ${info_route} should return the tournament data`, async () => {
-  const res = await node_fetch(info_route);
-
-  const json_res = await res.json();
-
-  expect(json_res).toEqual({
-    data: {
-      __v: 0,
-      _id: tournament_id.toString(),
-      athletes: [],
-      category: {
-        __v: 0,
-        _id: category_id.toString(),
-        age_class: null,
-        gender: 'M',
-        max_weight: '55',
-      },
-      competition: {
-        __v: 0,
-        _id: competition_id.toString(),
-        name: 'competition'
-      },
-      finished: false,
-      recovered_bracket_1: [],
-      recovered_bracket_2: [],
-      tatami_number: null,
-      winners_bracket: [],
-    },
-    status: 'success',
-  });
-});
-
-test(`GET ${invalid_info_route} with invalid id should return 400 status bad request`, async () => {
-  const res = await node_fetch(invalid_info_route, {
-    method: 'GET'
-  });
-
-  const json_res = await res.json();
-
-  expect(json_res).toEqual({
-    status: 'fail',
-    message: 'Id torneo non valido'
-  });
-});
-
-test(`GET ${non_existent_info_route} with unexisting id should return 404 status not found`, async () => {
-  const res = await node_fetch(non_existent_info_route, {
-    method: 'GET'
-  });
-
-  const json_res = await res.json();
-
-  expect(json_res).toEqual({
-    status: 'fail',
-    message: 'Torneo non trovato'
-  });
 });
 
 test(`GET ${matches_route} should return the matches correctly for a tournament that's not finished`, async () => {

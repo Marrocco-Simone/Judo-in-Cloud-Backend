@@ -436,7 +436,7 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if ther
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Age class not found',
+    message: 'Classe d\'età non trovata',
     status: 'fail'
   });
 });
@@ -455,13 +455,13 @@ test(`POST ${age_class_route_v1}/:age_class_id should give back an error if the 
     }
   });
 
-  expect(res.status).toBe(500);
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
-    status: 'error'
+    message: 'Id della classe d\'età non valido',
+    status: 'fail'
   });
 });
 
@@ -684,7 +684,7 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error i
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Age class not found',
+    message: 'Classe d\'età non trovata',
     status: 'fail'
   });
 });
@@ -702,13 +702,13 @@ test(`GET ${age_class_route_v2}/reopen/:age_class_id should give back an error i
     }
   });
 
-  expect(res.status).toBe(500);
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
-    status: 'error'
+    message: 'Id della classe d\'età non valido',
+    status: 'fail'
   });
 });
 
@@ -1008,7 +1008,7 @@ test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back an error 
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Age class not found',
+    message: 'Classe d\'età non trovata',
     status: 'fail'
   });
 });
@@ -1027,13 +1027,13 @@ test(`POST ${age_class_route_v2}/reopen/:age_class_id should give back an error 
     }
   });
 
-  expect(res.status).toBe(500);
+  expect(res.status).toBe(400);
 
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'Cast to ObjectId failed for value "an invalid mongodb id" (type string) at path "_id" for model "AgeClass"',
-    status: 'error'
+    message: 'Id della classe d\'età non valido',
+    status: 'fail'
   });
 });
 

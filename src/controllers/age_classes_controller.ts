@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { RequestHandler } from 'express';
 import { AgeClass, AgeClassInterface } from '../schemas/AgeClass';
 import { success, error, fail } from '../controllers/base_controller';
@@ -48,8 +49,11 @@ export const update_age_class: RequestHandler = async (req, res) => {
   const competition = user.competition;
   try {
     const age_class_id = req.params.age_class_id;
+    if (!mongoose.isValidObjectId(age_class_id)) {
+      return fail(res, 'Id della classe d\'età non valido');
+    }
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age class not found', 404);
+    if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
     const body: {
       closed: boolean;
       params: {
@@ -126,8 +130,11 @@ async function closeAgeClass(
 export const is_age_class_reopenable: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
+    if (!mongoose.isValidObjectId(age_class_id)) {
+      return fail(res, 'Id della classe d\'età non valido');
+    }
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age class not found', 404);
+    if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
 
     const { competition: user_competition } = req.user;
     if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'This user is registered for another competition', 403);
@@ -165,8 +172,11 @@ export const is_age_class_reopenable: RequestHandler = async (req, res) => {
 export const reopen_age_class: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
+    if (!mongoose.isValidObjectId(age_class_id)) {
+      return fail(res, 'Id della classe d\'età non valido');
+    }
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age class not found', 404);
+    if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
 
     const { competition: user_competition } = req.user;
     if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'This user is registered for another competition', 403);
