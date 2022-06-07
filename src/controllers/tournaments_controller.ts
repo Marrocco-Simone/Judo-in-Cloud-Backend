@@ -140,10 +140,13 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
   }
 };
 
-// Get rankings for a specific tournament
-export const get_tournament_ranking: RequestHandler = async (req, res) => {
+// Get leaderboard for a specific tournament
+export const get_tournament_leaderboard: RequestHandler = async (req, res) => {
+  const tournament_id = req.params.tournament_id;
+  if (!mongoose.isValidObjectId(tournament_id)) {
+    return fail(res, 'Id torneo non valido');
+  }
   try {
-    const tournament_id = req.params.tournament_id;
     const tournament = await Tournament.findById(tournament_id)
       .populate('category')
       .populate('competition')
@@ -160,7 +163,9 @@ export const get_tournament_ranking: RequestHandler = async (req, res) => {
         path: 'recovered_bracket_2',
         model: 'Match',
       });
-    if (!tournament) throw new Error('No tournament found');
+    if (!tournament) {
+      return fail(res, 'Torneo non trovato', 404);
+    }
 
     const {
       winners_bracket,
@@ -191,7 +196,7 @@ export const get_tournament_ranking: RequestHandler = async (req, res) => {
       ({ winner_athlete: third_place_2, loser_athlete: fifth_place_2 } = getMatchWinner({ match: recovered_final_2 }));
     }
 
-    const final_rankings = [
+    const final_leaderboard = [
       { place: 1, athlete: first_place },
       { place: 2, athlete: second_place },
       { place: 3, athlete: third_place_1 },
@@ -200,7 +205,7 @@ export const get_tournament_ranking: RequestHandler = async (req, res) => {
       { place: 5, athlete: fifth_place_2 }
     ].filter(r => r.athlete);
 
-    return success(res, final_rankings);
+    return success(res, final_leaderboard);
   } catch (err) {
     return error(res, err.message, 500);
   }
