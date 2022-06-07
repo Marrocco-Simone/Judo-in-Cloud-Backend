@@ -1,4 +1,4 @@
-import { Category, CategoryInterface } from '../schemas/Category';
+import { Category } from '../schemas/Category';
 import { error, fail, success } from '../controllers/base_controller';
 import { Athlete, AthleteInterface } from '../schemas/Athlete';
 import mongoose, { Types } from 'mongoose';
