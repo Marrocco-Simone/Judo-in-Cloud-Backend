@@ -124,6 +124,9 @@ export const create_athlete: RequestHandler = async (req, res) => {
         req.user.competition._id
       ),
     });
+
+    if (!athlete.category) return fail(res, 'Non esiste una categoria adatta all\'atleta');
+
     const new_athlete_category = await Category.findById(athlete.category);
     const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
     if (new_athlete_ageclass.closed) {
@@ -186,6 +189,9 @@ export const update_athlete: RequestHandler = async (req, res) => {
         req.user.competition._id,
       );
     }
+
+    if (!athlete.category) return fail(res, 'Non esiste una categoria adatta all\'atleta');
+
     const new_athlete_category = await Category.findById(athlete.category);
     const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
     if (new_athlete_ageclass.closed) {
@@ -259,5 +265,6 @@ async function computeCategory(
     }
     return curr;
   }, null);
-  return best_category._id;
+
+  return best_category?._id;
 }
