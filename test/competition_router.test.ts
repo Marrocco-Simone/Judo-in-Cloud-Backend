@@ -124,6 +124,27 @@ test(`GET ${competition_tournaments_route}/:competition_id/tournaments should re
   });
 });
 
+test(`GET ${competition_tournaments_route}/:competition_id/tournaments should fail with status 500 if there's an internal error during Tournament retrieval`, async () => {
+  const tournament_find_stub = jest.spyOn(Tournament, 'find').mockImplementation(() => {
+    throw new Error('Mongodb error');
+  });
+
+  const res = await node_fetch(`${competition_tournaments_route}/${competition_id.toString()}/tournaments`, {
+    method: 'GET'
+  });
+
+  expect(res.status).toBe(500);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    message: 'Errore nel trovare i tornei',
+    status: 'error',
+  });
+
+  expect(tournament_find_stub).toBeCalledTimes(1);
+});
+
 test(`GET ${competition_tournaments_route}/:competition_id/tournaments should fail with status 404 not found if the id is valid, but not on the db`, async () => {
   const non_existent_competition_id = new mongoose.Types.ObjectId();
 

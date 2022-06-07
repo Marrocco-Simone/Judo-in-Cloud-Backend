@@ -45,7 +45,7 @@ export const update_match: RequestHandler = async (req, res) => {
   try {
     const match_id = req.params.match_id;
     const match = await Match.findById(match_id);
-    if (!match) return fail(res, 'Match not found', 404);
+    if (!match) return fail(res, 'Incontro non trovato', 404);
     const tournament = await Tournament.findById(match.tournament)
       .populate({
         path: 'winners_bracket',

@@ -52,6 +52,6 @@ export const get_competition_tournaments: RequestHandler = async (req, res) => {
     success(res, tournaments);
   } catch (err) {
     console.error({ err });
-    error(res, 'Errore nel trovare i tornei');
+    return error(res, 'Errore nel trovare i tornei');
   }
 };

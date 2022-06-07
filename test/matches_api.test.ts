@@ -242,3 +242,71 @@ test(`POST ${match_2_route} should update the match and return the new data`, as
     },
   });
 });
+
+test(`POST ${nonexistent_match_route} on non existing match should fail and return 404 not found`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: 3600 * 24,
+  });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(nonexistent_match_route, {
+    headers: { authorization, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      winner_athlete: athlete_2_id.toString(),
+      is_started: true,
+      is_over: true,
+      match_scores: {
+        final_time: 6,
+        white_ippon: 1,
+        white_wazaari: 0,
+        white_penalties: 2,
+        red_ippon: 0,
+        red_wazaari: 1,
+        red_penalties: 0
+      }
+    }),
+    method: 'POST',
+  });
+  expect(res.status).toBe(404);
+
+  const json_res = await res.json();
+  expect(json_res).toEqual({
+    message: 'Incontro non trovato',
+    status: 'fail'
+  });
+});
+
+test(`POST ${match_2_route} should fail with values not matching the data model`, async () => {
+  const valid_user = { _id: user_id_1, username: 'validUser' };
+  const access_jwt = jwt.sign(valid_user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: 3600 * 24,
+  });
+  const authorization = `Bearer ${access_jwt}`;
+
+  const res = await node_fetch(match_2_route, {
+    headers: { authorization, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      winner_athlete: athlete_2_id.toString(),
+      is_started: true,
+      is_over: true,
+      match_scores: {
+        final_time: '5 minutes and 15 seconds',
+        white_ippon: 1,
+        white_wazaari: 0,
+        white_penalties: 2,
+        red_ippon: 0,
+        red_wazaari: 1,
+        red_penalties: 0
+      }
+    }),
+    method: 'POST',
+  });
+  expect(res.status).toBe(500);
+
+  const json_res = await res.json();
+  expect(json_res).toEqual({
+    message: 'Match validation failed: match_scores.final_time: Cast to Number failed for value "5 minutes and 15 seconds" (type string) at path "match_scores.final_time"',
+    status: 'error'
+  });
+});
