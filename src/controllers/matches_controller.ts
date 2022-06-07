@@ -78,9 +78,9 @@ export const update_match: RequestHandler = async (req, res) => {
     if (body.match_scores) match.match_scores = body.match_scores;
     if (body.winner_athlete) {
       let winner_idx: number;
-      if (match.white_athlete.equals(body.winner_athlete)) {
+      if (match?.white_athlete?.equals(body.winner_athlete)) {
         winner_idx = 0;
-      } else if (match.red_athlete.equals(body.winner_athlete)) {
+      } else if (match?.red_athlete?.equals(body.winner_athlete)) {
         winner_idx = 1;
       } else {
         return fail(res, 'Atleta vincitore non trovato');
