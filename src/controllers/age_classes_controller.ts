@@ -35,8 +35,11 @@ export const get_age_classes: RequestHandler = async (req, res) => {
 export const get_age_class: RequestHandler = async (req, res) => {
   try {
     const age_class_id = req.params.age_class_id;
+    if (!mongoose.isValidObjectId(age_class_id)) {
+      return fail(res, 'Id della classe d\'età non valido');
+    }
     const age_class = await AgeClass.findById(age_class_id);
-    if (!age_class) return fail(res, 'Age class not found', 404);
+    if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
     success(res, age_class);
   } catch (e) {
     console.log(e);
@@ -137,7 +140,7 @@ export const is_age_class_reopenable: RequestHandler = async (req, res) => {
     if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
 
     const { competition: user_competition } = req.user;
-    if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'This user is registered for another competition', 403);
+    if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'L\'utente è registrato per un\'altra gara', 403);
 
     if (!age_class.closed) return success(res, { can_reopen: true });
 
@@ -179,7 +182,7 @@ export const reopen_age_class: RequestHandler = async (req, res) => {
     if (!age_class) return fail(res, 'Classe d\'età non trovata', 404);
 
     const { competition: user_competition } = req.user;
-    if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'This user is registered for another competition', 403);
+    if (user_competition._id.toString() !== age_class.competition.toString()) return fail(res, 'L\'utente è registrato per un\'altra gara', 403);
 
     if (!age_class.closed) return success(res, age_class);
 

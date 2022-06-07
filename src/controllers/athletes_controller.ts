@@ -29,7 +29,7 @@ export const get_clubs: RequestHandler = async (req, res) => {
     const clubs_array = Array.from(clubs);
     success(res, clubs_array, 200);
   } catch (err) {
-    fail(res, 'Internal error', 500);
+    fail(res, 'Errore interno al sistema', 500);
   }
 };
 
@@ -49,7 +49,7 @@ export const get_athletes_by_club = async (req, res) => {
       ],
     });
 
-    if (!athletes.length) return fail(res, 'The club was not found', 404);
+    if (!athletes.length) return fail(res, 'Club non trovato', 404);
 
     const tournaments = await Tournament.find();
 
@@ -130,7 +130,7 @@ export const create_athlete: RequestHandler = async (req, res) => {
     const new_athlete_category = await Category.findById(athlete.category);
     const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
     if (new_athlete_ageclass.closed) {
-      return fail(res, 'Cannot delete athlete since age class is closed');
+      return fail(res, 'L\'atleta non può essere eliminato, dato che la classe d\'età è chiusa');
     }
 
     const new_athlete = await athlete.save();
@@ -151,7 +151,7 @@ export const update_athlete: RequestHandler = async (req, res) => {
     }
     const id = new mongoose.Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
-    if (!athlete) return fail(res, 'Athlete not found', 404);
+    if (!athlete) return fail(res, 'Atleta non trovato', 404);
 
     const body: {
       name?: string;
@@ -195,7 +195,7 @@ export const update_athlete: RequestHandler = async (req, res) => {
     const new_athlete_category = await Category.findById(athlete.category);
     const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
     if (new_athlete_ageclass.closed) {
-      return fail(res, 'Cannot delete athlete since age class is closed');
+      return fail(res, 'L\'atleta non può essere eliminato, dato che la classe d\'età è chiusa');
     }
 
     await athlete.save();
@@ -217,20 +217,20 @@ export const delete_athlete: RequestHandler = async (req, res) => {
     const competition = me.competition;
     const id = new mongoose.Types.ObjectId(req.params.athlete_id);
     const athlete = await Athlete.findById(id);
-    if (!athlete) return fail(res, 'Athlete not found', 404);
+    if (!athlete) return fail(res, 'Atleta non trovato', 404);
     if (!athlete.competition.equals(competition._id)) {
       return fail(res, 'Non sei autorizzato', 403);
     }
     const new_athlete_category = await Category.findById(athlete.category);
     const new_athlete_ageclass = await AgeClass.findById(new_athlete_category.age_class);
     if (new_athlete_ageclass.closed) {
-      return fail(res, 'Cannot delete athlete since age class is closed');
+      return fail(res, 'L\'atleta non può essere eliminato, dato che la classe d\'età è chiusa');
     }
     await athlete.remove();
     success(res, athlete, 200);
   } catch (err) {
     console.error(err);
-    fail(res, 'Internal error: '+err.message, 500);
+    fail(res, 'Errore interno: '+err.message, 500);
   }
 };
 

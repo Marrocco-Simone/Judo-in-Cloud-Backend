@@ -663,7 +663,7 @@ test(`GET ${club_route}/:club should fail with status 404 if the club in input i
   const json_res = await res.json();
 
   expect(json_res).toEqual({
-    message: 'The club was not found',
+    message: 'Club non trovato',
     status: 'fail'
   });
 });

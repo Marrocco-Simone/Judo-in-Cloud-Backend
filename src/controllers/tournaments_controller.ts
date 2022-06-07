@@ -119,7 +119,7 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
   const id = req.params.tournament_id;
 
   if (!mongoose.isValidObjectId(id)) {
-    return fail(res, 'Tournament id is not valid');
+    return fail(res, 'Id torneo non valido');
   }
   if (req.body.tatami_number === undefined) {
     return fail(res, 'Devi indicare un numero tatami');
@@ -132,7 +132,7 @@ export const reserve_tournament: RequestHandler = async (req, res) => {
   try {
     const update_tournament = await Tournament.findById(id);
     if (update_tournament === null) {
-      return fail(res, 'Tournament not found', 404);
+      return fail(res, 'Torneo non trovato', 404);
     }
     if (!update_tournament.competition.equals(competition._id)) {
       return fail(res, 'Non puoi eseguire questa operazione', 403);
