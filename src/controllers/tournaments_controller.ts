@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import mongoose from 'mongoose';
-import { Match, Tournament } from '../schemas';
+import { Tournament } from '../schemas';
 import { MatchInterface } from '../schemas/Match';
 import { error, fail, success } from './base_controller';
 
@@ -73,14 +73,17 @@ export const get_tournament_matches: RequestHandler = async (req, res) => {
       .populate({
         path: 'winners_bracket',
         model: 'Match',
+        populate: ['red_athlete', 'white_athlete', 'winner_athlete']
       })
       .populate({
         path: 'recovered_bracket_1',
         model: 'Match',
+        populate: ['red_athlete', 'white_athlete', 'winner_athlete']
       })
       .populate({
         path: 'recovered_bracket_2',
         model: 'Match',
+        populate: ['red_athlete', 'white_athlete', 'winner_athlete']
       });
     if (!tournament) throw new Error('No tournament found');
 
@@ -210,7 +213,7 @@ async function getMatches({ winners_bracket, recovered_bracket_1, recovered_brac
     const winners_round = winners_bracket[r];
     if (!winners_round) continue;
 
-    const winners_round_matches = await getMatchesFromRound({ round: winners_round });
+    const winners_round_matches = winners_round.filter((match) => match !== null);
     matches.push(...winners_round_matches);
 
     if (r === 0) continue;
@@ -219,12 +222,12 @@ async function getMatches({ winners_bracket, recovered_bracket_1, recovered_brac
     const recovered_round_2 = recovered_bracket_2[r - 1];
 
     if (recovered_round_1) {
-      const recovered_round_1_matches = await getMatchesFromRound({ round: recovered_round_1 });
+      const recovered_round_1_matches = recovered_round_1.filter((match) => match !== null);
       matches.push(...recovered_round_1_matches);
     }
 
     if (recovered_round_2) {
-      const recovered_round_2_matches = await getMatchesFromRound({ round: recovered_round_2 });
+      const recovered_round_2_matches = recovered_round_2.filter((match) => match !== null);
       matches.push(...recovered_round_2_matches);
     }
   }
@@ -236,39 +239,21 @@ async function getMatches({ winners_bracket, recovered_bracket_1, recovered_brac
   const winners_round = winners_bracket[final_index];
 
   if (recovered_round_1) {
-    const recovered_round_1_matches = await getMatchesFromRound({ round: recovered_round_1 });
+    const recovered_round_1_matches = recovered_round_1.filter((match) => match !== null);
     matches.push(...recovered_round_1_matches);
   }
 
   if (recovered_round_2) {
-    const recovered_round_2_matches = await getMatchesFromRound({ round: recovered_round_2 });
+    const recovered_round_2_matches = recovered_round_2.filter((match) => match !== null);
     matches.push(...recovered_round_2_matches);
   }
 
   if (winners_round) {
-    const winners_round_matches = await getMatchesFromRound({ round: winners_round });
+    const winners_round_matches = winners_round.filter((match) => match !== null);
     matches.push(...winners_round_matches);
   }
 
   return matches;
-}
-
-async function getMatchesFromRound({ round }) {
-  const round_matches = [];
-
-  for (const match_id of round) {
-    if (!match_id) continue;
-    const match = await Match.findById(match_id);
-    if (!match) {
-      throw new Error(
-        "Found match_id which doesn't reference an existing match"
-      );
-    }
-
-    round_matches.push(match);
-  }
-
-  return round_matches;
 }
 
 function getMatchWinner ({ match }) {
