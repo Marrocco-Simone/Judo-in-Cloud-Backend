@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Competition, Tournament, User } from '../src/schemas';
+import { Category, Competition, Tournament, User } from '../src/schemas';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -13,6 +13,7 @@ let server: Server;
 const user_id_1 = new mongoose.Types.ObjectId();
 const competition_id = new mongoose.Types.ObjectId();
 const tournament_id = new mongoose.Types.ObjectId();
+const category_id = new mongoose.Types.ObjectId();
 const unauth_tournament_id = new mongoose.Types.ObjectId();
 const finished_tournament_id = new mongoose.Types.ObjectId();
 
@@ -27,6 +28,9 @@ const player_third_2 = new mongoose.Types.ObjectId();
 const player_fifth_1 = new mongoose.Types.ObjectId();
 const player_fifth_2 = new mongoose.Types.ObjectId();
 
+const info_route = `http://localhost:2500/api/v2/tournaments/${tournament_id}`;
+const invalid_info_route = 'http://localhost:2500/api/v2/tournaments/123';
+const non_existent_info_route = `http://localhost:2500/api/v2/tournaments/${new mongoose.Types.ObjectId()}`;
 const tour_reserve_route = `http://localhost:2500/api/v2/tournaments/reserve/${tournament_id}`;
 const non_existent_tour_reserve_route = `http://localhost:2500/api/v2/tournaments/reserve/${new mongoose.Types.ObjectId()}`;
 const invalid_tour_reserve_route = 'http://localhost:2500/api/v2/tournaments/reserve/123';
@@ -59,6 +63,16 @@ beforeEach(async () => {
   await User.deleteMany({});
   await user.save();
 
+  const category = new Category({
+    _id: category_id,
+    age_class: null,
+    max_weight: 55,
+    gender: 'M'
+  });
+
+  await Category.deleteMany({});
+  await category.save();
+
   const matches = [
     new Match({ // final match, first player wins
       _id: final_match_id,
@@ -85,7 +99,7 @@ beforeEach(async () => {
   const tournament = new Tournament({
     _id: tournament_id,
     competition: competition_id,
-    category: new mongoose.Types.ObjectId(),
+    category: category_id,
     tatami_number: null,
     finished: false,
     athletes: [],
@@ -115,6 +129,7 @@ beforeEach(async () => {
     recovered_bracket_1: [[], [matches[1]._id]],
     recovered_bracket_2: [[], [matches[2]._id]],
   });
+
   await Tournament.deleteMany({});
   await tournament.save();
   await unauth_tournament.save();
@@ -289,4 +304,62 @@ test(`GET ${invalid_leaderboard_route} should fail with status 400 since the id 
 
   expect(res.status).toBe(400);
   expect(json_res.status).toBe('fail');
+});
+
+test(`GET ${info_route} should return the tournament data`, async () => {
+  const res = await node_fetch(info_route);
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    data: {
+      __v: 0,
+      _id: tournament_id.toString(),
+      athletes: [],
+      category: {
+        __v: 0,
+        _id: category_id.toString(),
+        age_class: null,
+        gender: 'M',
+        max_weight: '55',
+      },
+      competition: {
+        __v: 0,
+        _id: competition_id.toString(),
+        name: 'competition'
+      },
+      finished: false,
+      recovered_bracket_1: [],
+      recovered_bracket_2: [],
+      tatami_number: null,
+      winners_bracket: [],
+    },
+    status: 'success',
+  });
+});
+
+test(`GET ${invalid_info_route} with invalid id should return 400 status bad request`, async () => {
+  const res = await node_fetch(invalid_info_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Id torneo non valido'
+  });
+});
+
+test(`GET ${non_existent_info_route} with unexisting id should return 404 status not found`, async () => {
+  const res = await node_fetch(non_existent_info_route, {
+    method: 'GET'
+  });
+
+  const json_res = await res.json();
+
+  expect(json_res).toEqual({
+    status: 'fail',
+    message: 'Torneo non trovato'
+  });
 });
